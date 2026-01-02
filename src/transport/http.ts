@@ -83,6 +83,12 @@ export class HttpTransport extends Transport {
 
         res.on('end', () => {
           try {
+            // If there's no response data, just resolve (for notifications)
+            if (!responseData.trim()) {
+              resolve();
+              return;
+            }
+
             const response = JSON.parse(responseData);
             this.emit('receive', response);
 
@@ -94,7 +100,8 @@ export class HttpTransport extends Transport {
 
             resolve();
           } catch (error) {
-            reject(new Error(`Failed to parse response: ${responseData}`));
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            reject(new Error(`Failed to process HTTP response: ${errorMessage}`));
           }
         });
       });

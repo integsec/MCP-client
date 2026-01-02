@@ -1,7 +1,7 @@
 {
   "name": "mcp-pentester-cli",
   "version": "1.0.0",
-  "description": "Interactive console tool for pentesting MCP servers via JSON-RPC 2.0",
+  "description": "Interactive console tool for pentesting MCP servers via JSON-RPC 2.0 - IntegSec Proprietary",
   "main": "dist/index.js",
   "bin": {
     "mcp-cli": "./dist/index.js"
@@ -11,9 +11,10 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts"
   },
-  "keywords": ["mcp", "pentesting", "json-rpc", "cli", "tui"],
-  "author": "",
-  "license": "MIT",
+  "keywords": ["mcp", "pentesting", "json-rpc", "cli", "tui", "integsec", "security"],
+  "author": "IntegSec",
+  "license": "SEE LICENSE IN LICENSE",
+  "private": true,
   "dependencies": {
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.11.0",

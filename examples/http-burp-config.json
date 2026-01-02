@@ -1,0 +1,9 @@
+{
+  "type": "http",
+  "url": "http://localhost:3000/mcp",
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "protocol": "http"
+  }
+}

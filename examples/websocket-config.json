@@ -1,0 +1,9 @@
+{
+  "type": "wss",
+  "url": "wss://api.example.com/mcp",
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "protocol": "http"
+  }
+}

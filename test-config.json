@@ -1,0 +1,43 @@
+{
+  "stdio": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "/tmp"
+    ],
+    "env": {}
+  },
+  "http": {
+    "type": "http",
+    "url": "http://localhost:3000/mcp",
+    "proxy": {
+      "host": "127.0.0.1",
+      "port": 8080,
+      "protocol": "http"
+    }
+  },
+  "https": {
+    "type": "https",
+    "url": "https://api.example.com/mcp",
+    "proxy": {
+      "host": "127.0.0.1",
+      "port": 8080,
+      "protocol": "http",
+      "auth": {
+        "username": "user",
+        "password": "pass"
+      }
+    }
+  },
+  "websocket": {
+    "type": "wss",
+    "url": "wss://api.example.com/mcp",
+    "proxy": {
+      "host": "127.0.0.1",
+      "port": 9050,
+      "protocol": "socks5"
+    }
+  }
+}

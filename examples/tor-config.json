@@ -1,0 +1,9 @@
+{
+  "type": "wss",
+  "url": "wss://api.example.onion/mcp",
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 9050,
+    "protocol": "socks5"
+  }
+}

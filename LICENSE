@@ -1,0 +1,75 @@
+INTEGSEC PROPRIETARY SOFTWARE LICENSE
+
+Copyright (c) 2025 IntegSec. All Rights Reserved.
+
+NOTICE: This software and associated documentation files (the "Software") are
+proprietary and confidential to IntegSec.
+
+GRANT OF LICENSE:
+Subject to the terms and conditions of this License, IntegSec grants you a
+limited, non-exclusive, non-transferable, revocable license to use the Software
+solely for:
+  (a) Internal security testing and penetration testing purposes
+  (b) Educational and research purposes in an academic setting
+  (c) Security consulting engagements conducted by authorized security professionals
+
+RESTRICTIONS:
+You may NOT:
+  1. Use the Software for any commercial purpose without a separate written
+     commercial license agreement with IntegSec
+  2. Redistribute, sublicense, sell, rent, lease, or lend the Software
+  3. Modify, adapt, translate, reverse engineer, decompile, or disassemble
+     the Software
+  4. Remove or alter any proprietary notices, labels, or marks on the Software
+  5. Create derivative works based upon the Software
+  6. Use the Software in any manner that competes with IntegSec's business
+  7. Transfer, assign, or sublicense your rights under this License
+
+COMMERCIAL USE:
+Any commercial use of this Software requires a separate commercial license from
+IntegSec. Commercial use includes, but is not limited to:
+  - Using the Software as part of a commercial service offering
+  - Incorporating the Software into commercial products
+  - Using the Software in a commercial consulting engagement for profit
+  - Providing the Software as a managed service
+
+For commercial licensing inquiries, contact: licensing@integsec.com
+
+INTELLECTUAL PROPERTY:
+This Software is protected by copyright laws and international copyright treaties,
+as well as other intellectual property laws and treaties. IntegSec retains all
+right, title, and interest in and to the Software, including all copyrights,
+patents, trade secrets, trademarks, and other intellectual property rights.
+
+NO WARRANTY:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+INTEGSEC BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+LIMITATION OF LIABILITY:
+IN NO EVENT SHALL INTEGSEC BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT,
+OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES
+FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS
+INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR
+INABILITY TO USE THIS SOFTWARE.
+
+TERMINATION:
+This License is effective until terminated. Your rights under this License will
+terminate automatically without notice from IntegSec if you fail to comply with
+any term(s) of this License. Upon termination, you shall cease all use of the
+Software and destroy all copies, full or partial, of the Software.
+
+GOVERNING LAW:
+This License shall be governed by and construed in accordance with the laws of
+the jurisdiction in which IntegSec is registered, without regard to its conflict
+of law provisions.
+
+ENTIRE AGREEMENT:
+This License constitutes the entire agreement between you and IntegSec relating
+to the Software and supersedes all prior or contemporaneous understandings
+regarding such subject matter.
+
+For questions about this License, contact: legal@integsec.com

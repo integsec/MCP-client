@@ -19,6 +19,7 @@ export class StdioTransport extends Transport {
       this.process = spawn(this.command, this.args, {
         env: { ...process.env, ...this.env },
         stdio: ['pipe', 'pipe', 'pipe'],
+        shell: process.platform === 'win32',
       });
 
       this.process.stdout?.on('data', (data: Buffer) => {
@@ -51,7 +52,7 @@ export class StdioTransport extends Transport {
   }
 
   async send(data: JsonRpcRequest | JsonRpcNotification): Promise<void> {
-    if (!this.process || !this.process.stdin) {
+    if (!this.process || !this.process.stdin || this.process.stdin.destroyed) {
       throw new Error('Transport not connected');
     }
 

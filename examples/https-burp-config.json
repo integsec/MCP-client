@@ -1,0 +1,13 @@
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "protocol": "http",
+    "auth": {
+      "username": "pentester",
+      "password": "changeme"
+    }
+  }
+}

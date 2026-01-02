@@ -1,0 +1,33 @@
+{
+  "name": "mcp-pentester-cli",
+  "version": "1.0.0",
+  "description": "Interactive console tool for pentesting MCP servers via JSON-RPC 2.0",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-cli": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": ["mcp", "pentesting", "json-rpc", "cli", "tui"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.11.0",
+    "commander": "^11.1.0",
+    "ws": "^8.16.0",
+    "http-proxy-agent": "^7.0.0",
+    "https-proxy-agent": "^7.0.2",
+    "socks-proxy-agent": "^8.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/blessed": "^0.1.25",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}

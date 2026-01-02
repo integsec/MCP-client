@@ -4,6 +4,8 @@
 
 An interactive console tool for penetration testers to interact with Model Context Protocol (MCP) servers via JSON-RPC 2.0. Supports multiple transport protocols (stdio, HTTP/HTTPS, WebSocket) with full proxy support for tools like Burp Suite.
 
+![My screenshot](client-screenshot.png)
+
 **Copyright © 2025 IntegSec. All Rights Reserved.**
 
 ## Features

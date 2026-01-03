@@ -6,6 +6,7 @@
 ## What's New
 
 ### Professional IntegSec Branding
+
 - **Splash Screen**: Shows IntegSec logo and copyright on startup
   - Auto-closes after 2 seconds
   - Press any key to close immediately
@@ -15,11 +16,13 @@
 ### Enhanced Visual Experience
 
 #### Active Panel Highlighting
+
 - **Bold yellow border** shows which panel is currently active
 - Always know where your keystrokes will go
 - Press F1/F2/F3 to switch between panels instantly
 
 #### Beautiful Popup Windows
+
 - **Syntax-highlighted JSON** in all result displays
 - **Larger windows** (90% width, 85% height) for better readability
 - **Enhanced scrollbars** with visual indicators
@@ -32,18 +35,22 @@
 ### Intelligent Traffic Monitoring
 
 #### Request/Response Pairing
+
 Traffic log now shows requests and responses together:
+
 ```
 [12:34:56.789] >>> tools/call tool=read_file args=path
 [12:34:56.890] <<< {contents,encoding}
 ```
 
 **Benefits:**
+
 - No more scrolling to find matching messages
 - See cause and effect immediately
 - Most recent activity at the top
 
 #### Rich Details
+
 - **Tool calls**: Shows tool name and parameter names
 - **Resource reads**: Shows full URI
 - **Errors**: Highlighted in red with full message
@@ -52,12 +59,14 @@ Traffic log now shows requests and responses together:
 ### Professional Formatting
 
 #### Smart JSON Display
+
 - Auto-detects JSON strings and formats them
 - Syntax highlighting for better readability
 - Proper indentation
 - Handles nested structures
 
 #### Context-Aware Previews
+
 - **Objects**: `{key1,key2,key3}`
 - **Arrays**: `Array[5]`
 - **Strings**: Truncated with ellipsis if too long
@@ -66,6 +75,7 @@ Traffic log now shows requests and responses together:
 ## Key Features
 
 ### Function Key Navigation
+
 - **F1** - Focus navigation sidebar
 - **F2** - Focus main content panel
 - **F3** - Focus traffic log panel
@@ -74,16 +84,19 @@ Traffic log now shows requests and responses together:
 - **F10** - Quit application
 
 ### Transport Support
+
 - **stdio** - Local process communication
 - **HTTP/HTTPS** - Web-based MCP servers
 - **WebSocket (ws/wss)** - Real-time connections
 
 ### Proxy Integration
+
 - **HTTP/HTTPS proxies** - Burp Suite, ZAP, etc.
 - **SOCKS5 proxies** - Tor, SSH tunnels
 - **Authentication support** - Username/password
 
 ### Traffic Analysis
+
 - Real-time monitoring
 - Request/response pairing
 - Full JSON inspection
@@ -99,12 +112,14 @@ npm run build
 ## Quick Start
 
 ### Test Locally
+
 ```bash
 node dist/index.js connect --transport stdio \
   --command npx --args -y @modelcontextprotocol/server-filesystem /tmp
 ```
 
 ### Through Burp Suite
+
 ```bash
 node dist/index.js connect --transport http \
   --url http://localhost:3000/mcp \
@@ -112,6 +127,7 @@ node dist/index.js connect --transport http \
 ```
 
 ### Using Config File
+
 ```bash
 node dist/index.js gen-config -o my-config.json
 node dist/index.js connect --config my-config.json
@@ -120,16 +136,19 @@ node dist/index.js connect --config my-config.json
 ## What's Fixed
 
 ### Startup Issue
+
 - Splash screen now auto-closes after 2 seconds
 - No more hanging on startup
 - Can still close immediately with any keypress
 
 ### Traffic Display
+
 - Request/response pairing eliminates scrolling
 - Smart previews prevent information overload
 - Color coding makes scanning faster
 
 ### Navigation
+
 - Active panel always obvious with bold yellow border
 - Function keys provide instant panel switching
 - Consistent behavior across all views
@@ -155,11 +174,13 @@ node dist/index.js connect --config my-config.json
 This software is proprietary and confidential to IntegSec.
 
 **Free Use:**
+
 - Internal security testing
 - Educational purposes
 - Academic research
 
 **Requires License:**
+
 - Commercial consulting
 - Service offerings
 - Product integration
@@ -182,6 +203,7 @@ This software is proprietary and confidential to IntegSec.
 ## Future Roadmap
 
 Planned for future releases:
+
 - Traffic export (JSON, HAR formats)
 - Traffic filtering and search
 - Request replay functionality
@@ -200,6 +222,6 @@ See LICENSE file for complete terms and conditions.
 
 **IntegSec** - Professional Security Testing Tools
 
-*Build Date: January 2, 2025*
-*Version: 1.0.0*
-*License: Proprietary*
+_Build Date: January 2, 2025_
+_Version: 1.0.0_
+_License: Proprietary_

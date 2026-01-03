@@ -38,6 +38,7 @@ The transport layer provides an abstraction for different communication protocol
 - Provides event emitters for connection events
 
 Key methods:
+
 - `connect()`: Establish connection
 - `disconnect()`: Close connection
 - `request(method, params)`: Send JSON-RPC request
@@ -74,6 +75,7 @@ Use case: Testing WebSocket-based MCP servers, real-time communication
 The main client that implements the MCP protocol.
 
 Key features:
+
 - Protocol initialization and capability negotiation
 - Tool listing and execution
 - Resource browsing and reading
@@ -82,6 +84,7 @@ Key features:
 - Event emission for UI updates
 
 MCP Protocol Methods Implemented:
+
 - `initialize`: Handshake with server
 - `tools/list`: Get available tools
 - `tools/call`: Execute a tool
@@ -95,6 +98,7 @@ MCP Protocol Methods Implemented:
 Interactive console interface built with the blessed library.
 
 Layout:
+
 ```
 ┌─────────────┬──────────────────────────────┐
 │  Sidebar    │      Main Content            │
@@ -111,6 +115,7 @@ Layout:
 ```
 
 Features:
+
 - Real-time traffic monitoring
 - Interactive navigation
 - Keyboard shortcuts
@@ -152,16 +157,19 @@ TUI Update
 All transports support proxy configuration:
 
 ### HTTP/HTTPS Proxy
+
 - Used for HTTP/WebSocket transports
 - Supports basic authentication
 - Compatible with Burp Suite, ZAP, etc.
 
 ### SOCKS5 Proxy
+
 - Used for any transport type
 - Compatible with Tor, SSH tunnels
 - No authentication currently (can be added)
 
 Proxy flow:
+
 ```
 Client → Proxy (e.g., Burp) → Target Server
               ↓
@@ -173,12 +181,14 @@ Client → Proxy (e.g., Burp) → Target Server
 All types are defined in `types.ts`:
 
 ### JSON-RPC Types
+
 - `JsonRpcRequest`
 - `JsonRpcResponse`
 - `JsonRpcError`
 - `JsonRpcNotification`
 
 ### MCP Protocol Types
+
 - `MCPTool`
 - `MCPResource`
 - `MCPPrompt`
@@ -186,11 +196,13 @@ All types are defined in `types.ts`:
 - `MCPInitializeResult`
 
 ### Transport Types
+
 - `TransportType`
 - `TransportConfig`
 - `ProxyConfig`
 
 ### Application Types
+
 - `TrafficLog`
 - `MCPClientState`
 
@@ -199,6 +211,7 @@ All types are defined in `types.ts`:
 Configuration can be provided via:
 
 1. **Command-line arguments**
+
    ```bash
    --transport http --url http://... --proxy-host 127.0.0.1
    ```
@@ -217,6 +230,7 @@ Configuration can be provided via:
 The application uses Node.js EventEmitter for communication:
 
 ### Transport Events
+
 - `send`: JSON-RPC message sent
 - `receive`: JSON-RPC message received
 - `error`: Error occurred
@@ -225,6 +239,7 @@ The application uses Node.js EventEmitter for communication:
 - `disconnected`: Connection closed
 
 ### Client Events
+
 - `connected`: Client initialized
 - `disconnected`: Client disconnected
 - `traffic`: Traffic log entry
@@ -232,17 +247,20 @@ The application uses Node.js EventEmitter for communication:
 - `notification`: MCP notification
 
 ### UI Event Handling
+
 The TUI subscribes to client events and updates the display in real-time.
 
 ## Security Considerations
 
 ### For Pentesting
+
 - All traffic can be proxied for inspection
 - Raw JSON-RPC messages are logged
 - Support for SSL/TLS interception via proxy
 - SOCKS5 for anonymity (Tor)
 
 ### Code Security
+
 - Input validation on configuration
 - Timeout handling for requests
 - Error handling for network failures
@@ -260,6 +278,7 @@ The architecture supports easy extension:
 ## Dependencies
 
 ### Runtime
+
 - `blessed`: Terminal UI framework
 - `commander`: CLI argument parsing
 - `ws`: WebSocket client
@@ -268,6 +287,7 @@ The architecture supports easy extension:
 - `socks-proxy-agent`: SOCKS proxy support
 
 ### Development
+
 - `typescript`: Type checking and compilation
 - `@types/*`: Type definitions
 - `ts-node`: Development mode execution
@@ -281,6 +301,7 @@ npm start      # Run compiled version
 ```
 
 The TypeScript compiler (`tsc`) generates:
+
 - JavaScript files in `dist/`
 - Type definition files (`.d.ts`)
 - Source maps for debugging
@@ -288,6 +309,7 @@ The TypeScript compiler (`tsc`) generates:
 ## Future Enhancements
 
 Potential improvements:
+
 - Interactive tool execution with parameter prompts
 - Request/response history export
 - Custom JSON-RPC method support

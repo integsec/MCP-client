@@ -1,10 +1,15 @@
-import * as http from 'http';
-import * as https from 'https';
-import { HttpProxyAgent } from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { SocksProxyAgent } from 'socks-proxy-agent';
-import { Transport } from './base';
-import { JsonRpcRequest, JsonRpcResponse, JsonRpcNotification, ProxyConfig } from '../types';
+import * as http from "http";
+import * as https from "https";
+import { HttpProxyAgent } from "http-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import { SocksProxyAgent } from "socks-proxy-agent";
+import { Transport } from "./base";
+import {
+  JsonRpcRequest,
+  JsonRpcResponse,
+  JsonRpcNotification,
+  ProxyConfig,
+} from "../types";
 
 export class HttpTransport extends Transport {
   private agent?: http.Agent | https.Agent;
@@ -12,10 +17,10 @@ export class HttpTransport extends Transport {
 
   constructor(
     private url: string,
-    private proxyConfig?: ProxyConfig
+    private proxyConfig?: ProxyConfig,
   ) {
     super();
-    this.isHttps = url.startsWith('https://');
+    this.isHttps = url.startsWith("https://");
     this.setupAgent();
   }
 
@@ -26,11 +31,11 @@ export class HttpTransport extends Transport {
 
     const proxyAuth = this.proxyConfig.auth
       ? `${this.proxyConfig.auth.username}:${this.proxyConfig.auth.password}@`
-      : '';
+      : "";
 
-    const proxyProtocol = this.proxyConfig.protocol || 'http';
+    const proxyProtocol = this.proxyConfig.protocol || "http";
 
-    if (proxyProtocol === 'socks' || proxyProtocol === 'socks5') {
+    if (proxyProtocol === "socks" || proxyProtocol === "socks5") {
       const proxyUrl = `socks5://${proxyAuth}${this.proxyConfig.host}:${this.proxyConfig.port}`;
       this.agent = new SocksProxyAgent(proxyUrl);
     } else {
@@ -45,7 +50,7 @@ export class HttpTransport extends Transport {
 
   async connect(): Promise<void> {
     // HTTP transport doesn't need explicit connection
-    this.emit('connected');
+    this.emit("connected");
   }
 
   async disconnect(): Promise<void> {
@@ -56,7 +61,7 @@ export class HttpTransport extends Transport {
 
   async send(data: JsonRpcRequest | JsonRpcNotification): Promise<void> {
     const payload = JSON.stringify(data);
-    this.emit('send', data);
+    this.emit("send", data);
 
     return new Promise((resolve, reject) => {
       const urlObj = new URL(this.url);
@@ -66,22 +71,22 @@ export class HttpTransport extends Transport {
         hostname: urlObj.hostname,
         port: urlObj.port || (this.isHttps ? 443 : 80),
         path: urlObj.pathname + urlObj.search,
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload),
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload),
         },
         agent: this.agent,
       };
 
       const req = httpModule.request(options, (res) => {
-        let responseData = '';
+        let responseData = "";
 
-        res.on('data', (chunk) => {
+        res.on("data", (chunk) => {
           responseData += chunk;
         });
 
-        res.on('end', () => {
+        res.on("end", () => {
           try {
             // If there's no response data, just resolve (for notifications)
             if (!responseData.trim()) {
@@ -90,24 +95,27 @@ export class HttpTransport extends Transport {
             }
 
             const response = JSON.parse(responseData);
-            this.emit('receive', response);
+            this.emit("receive", response);
 
-            if ('result' in response || 'error' in response) {
+            if ("result" in response || "error" in response) {
               this.handleResponse(response as JsonRpcResponse);
-            } else if ('method' in response && !('id' in response)) {
+            } else if ("method" in response && !("id" in response)) {
               this.handleNotification(response as JsonRpcNotification);
             }
 
             resolve();
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            reject(new Error(`Failed to process HTTP response: ${errorMessage}`));
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            reject(
+              new Error(`Failed to process HTTP response: ${errorMessage}`),
+            );
           }
         });
       });
 
-      req.on('error', (error) => {
-        this.emit('error', error);
+      req.on("error", (error) => {
+        this.emit("error", error);
         reject(error);
       });
 

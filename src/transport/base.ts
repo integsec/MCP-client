@@ -1,12 +1,15 @@
-import { EventEmitter } from 'events';
-import { JsonRpcRequest, JsonRpcResponse, JsonRpcNotification } from '../types';
+import { EventEmitter } from "events";
+import { JsonRpcRequest, JsonRpcResponse, JsonRpcNotification } from "../types";
 
 export abstract class Transport extends EventEmitter {
   protected requestId = 0;
-  protected pendingRequests = new Map<number | string, {
-    resolve: (value: any) => void;
-    reject: (error: any) => void;
-  }>();
+  protected pendingRequests = new Map<
+    number | string,
+    {
+      resolve: (value: any) => void;
+      reject: (error: any) => void;
+    }
+  >();
 
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;
@@ -19,7 +22,7 @@ export abstract class Transport extends EventEmitter {
   async request(method: string, params?: any): Promise<any> {
     const id = this.generateRequestId();
     const request: JsonRpcRequest = {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       method,
       params,
       id,
@@ -45,7 +48,7 @@ export abstract class Transport extends EventEmitter {
 
   async notify(method: string, params?: any): Promise<void> {
     const notification: JsonRpcNotification = {
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       method,
       params,
     };
@@ -68,6 +71,6 @@ export abstract class Transport extends EventEmitter {
   }
 
   protected handleNotification(notification: JsonRpcNotification): void {
-    this.emit('notification', notification);
+    this.emit("notification", notification);
   }
 }

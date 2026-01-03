@@ -1,11 +1,18 @@
-import * as http from 'http';
-import * as https from 'https';
-import * as fs from 'fs';
-import { HttpProxyAgent } from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import { SocksProxyAgent } from 'socks-proxy-agent';
-import { Transport } from './base';
-import { JsonRpcRequest, JsonRpcResponse, JsonRpcNotification, ProxyConfig, AuthConfig, CertificateConfig } from '../types';
+import * as http from "http";
+import * as https from "https";
+import * as fs from "fs";
+import { HttpProxyAgent } from "http-proxy-agent";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import { SocksProxyAgent } from "socks-proxy-agent";
+import { Transport } from "./base";
+import {
+  JsonRpcRequest,
+  JsonRpcResponse,
+  JsonRpcNotification,
+  ProxyConfig,
+  AuthConfig,
+  CertificateConfig,
+} from "../types";
 
 interface SSEEvent {
   id?: string;
@@ -28,10 +35,10 @@ export class SSETransport extends Transport {
     private proxyConfig?: ProxyConfig,
     private authConfig?: AuthConfig,
     private certificateConfig?: CertificateConfig,
-    customHeaders?: Record<string, string>
+    customHeaders?: Record<string, string>,
   ) {
     super();
-    this.isHttps = url.startsWith('https://');
+    this.isHttps = url.startsWith("https://");
     this.customHeaders = customHeaders || {};
 
     // Extract endpoint path from URL
@@ -48,20 +55,25 @@ export class SSETransport extends Transport {
     }
 
     switch (this.authConfig.type) {
-      case 'bearer':
+      case "bearer":
         if (this.authConfig.token) {
-          this.authHeaders['Authorization'] = `Bearer ${this.authConfig.token}`;
+          this.authHeaders["Authorization"] = `Bearer ${this.authConfig.token}`;
         }
         break;
-      case 'basic':
+      case "basic":
         if (this.authConfig.username && this.authConfig.password) {
-          const credentials = Buffer.from(`${this.authConfig.username}:${this.authConfig.password}`).toString('base64');
-          this.authHeaders['Authorization'] = `Basic ${credentials}`;
+          const credentials = Buffer.from(
+            `${this.authConfig.username}:${this.authConfig.password}`,
+          ).toString("base64");
+          this.authHeaders["Authorization"] = `Basic ${credentials}`;
         }
         break;
-      case 'custom':
+      case "custom":
         if (this.authConfig.headers) {
-          this.authHeaders = { ...this.authHeaders, ...this.authConfig.headers };
+          this.authHeaders = {
+            ...this.authHeaders,
+            ...this.authConfig.headers,
+          };
         }
         break;
     }
@@ -84,7 +96,8 @@ export class SSETransport extends Transport {
         agentOptions.passphrase = this.certificateConfig.passphrase;
       }
       if (this.certificateConfig.rejectUnauthorized !== undefined) {
-        agentOptions.rejectUnauthorized = this.certificateConfig.rejectUnauthorized;
+        agentOptions.rejectUnauthorized =
+          this.certificateConfig.rejectUnauthorized;
       }
     }
 
@@ -97,11 +110,11 @@ export class SSETransport extends Transport {
 
     const proxyAuth = this.proxyConfig.auth
       ? `${this.proxyConfig.auth.username}:${this.proxyConfig.auth.password}@`
-      : '';
+      : "";
 
-    const proxyProtocol = this.proxyConfig.protocol || 'http';
+    const proxyProtocol = this.proxyConfig.protocol || "http";
 
-    if (proxyProtocol === 'socks' || proxyProtocol === 'socks5') {
+    if (proxyProtocol === "socks" || proxyProtocol === "socks5") {
       const proxyUrl = `socks5://${proxyAuth}${this.proxyConfig.host}:${this.proxyConfig.port}`;
       this.agent = new SocksProxyAgent(proxyUrl, agentOptions);
     } else {
@@ -109,7 +122,10 @@ export class SSETransport extends Transport {
       if (this.isHttps) {
         this.agent = new HttpsProxyAgent(proxyUrl, agentOptions);
       } else {
-        this.agent = new HttpProxyAgent(proxyUrl, agentOptions as http.AgentOptions);
+        this.agent = new HttpProxyAgent(
+          proxyUrl,
+          agentOptions as http.AgentOptions,
+        );
       }
     }
   }
@@ -117,7 +133,7 @@ export class SSETransport extends Transport {
   async connect(): Promise<void> {
     // Open SSE stream with GET request
     await this.openSSEStream();
-    this.emit('connected');
+    this.emit("connected");
   }
 
   private async openSSEStream(): Promise<void> {
@@ -126,43 +142,45 @@ export class SSETransport extends Transport {
       const httpModule = this.isHttps ? https : http;
 
       const headers: Record<string, string> = {
-        'Accept': 'text/event-stream',
-        'Cache-Control': 'no-cache',
+        Accept: "text/event-stream",
+        "Cache-Control": "no-cache",
         ...this.customHeaders,
         ...this.authHeaders,
       };
 
       // Include Last-Event-ID for session resumption
       if (this.lastEventId) {
-        headers['Last-Event-ID'] = this.lastEventId;
+        headers["Last-Event-ID"] = this.lastEventId;
       }
 
       const options: https.RequestOptions = {
         hostname: urlObj.hostname,
         port: urlObj.port || (this.isHttps ? 443 : 80),
         path: this.endpoint,
-        method: 'GET',
+        method: "GET",
         headers,
         agent: this.agent,
       };
 
       const req = httpModule.request(options, (res) => {
         if (res.statusCode !== 200) {
-          const error = new Error(`SSE connection failed: HTTP ${res.statusCode} ${res.statusMessage}`);
+          const error = new Error(
+            `SSE connection failed: HTTP ${res.statusCode} ${res.statusMessage}`,
+          );
           reject(error);
           return;
         }
 
         this.sseStream = res;
 
-        let buffer = '';
+        let buffer = "";
 
-        res.on('data', (chunk) => {
+        res.on("data", (chunk) => {
           buffer += chunk.toString();
 
           // Process complete SSE events (separated by double newline)
-          const lines = buffer.split('\n\n');
-          buffer = lines.pop() || ''; // Keep incomplete event in buffer
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() || ""; // Keep incomplete event in buffer
 
           for (const eventText of lines) {
             if (eventText.trim()) {
@@ -171,30 +189,30 @@ export class SSETransport extends Transport {
           }
         });
 
-        res.on('end', () => {
-          this.emit('disconnected');
+        res.on("end", () => {
+          this.emit("disconnected");
           // Auto-reconnect if not intentionally disconnected
           if (!this.reconnecting) {
             this.reconnecting = true;
             setTimeout(() => {
               this.reconnecting = false;
               this.openSSEStream().catch((error) => {
-                this.emit('error', error);
+                this.emit("error", error);
               });
             }, 1000);
           }
         });
 
-        res.on('error', (error) => {
-          this.emit('error', error);
+        res.on("error", (error) => {
+          this.emit("error", error);
           reject(error);
         });
 
         resolve();
       });
 
-      req.on('error', (error) => {
-        this.emit('error', error);
+      req.on("error", (error) => {
+        this.emit("error", error);
         reject(error);
       });
 
@@ -203,15 +221,15 @@ export class SSETransport extends Transport {
   }
 
   private handleSSEEvent(eventText: string): void {
-    const event: SSEEvent = { data: '' };
-    const lines = eventText.split('\n');
+    const event: SSEEvent = { data: "" };
+    const lines = eventText.split("\n");
 
     for (const line of lines) {
-      if (line.startsWith('id:')) {
+      if (line.startsWith("id:")) {
         event.id = line.substring(3).trim();
-      } else if (line.startsWith('event:')) {
+      } else if (line.startsWith("event:")) {
         event.event = line.substring(6).trim();
-      } else if (line.startsWith('data:')) {
+      } else if (line.startsWith("data:")) {
         event.data += line.substring(5).trim();
       }
     }
@@ -225,16 +243,16 @@ export class SSETransport extends Transport {
     if (event.data) {
       try {
         const message = JSON.parse(event.data);
-        this.emit('receive', message);
+        this.emit("receive", message);
 
         // Handle different message types
-        if ('result' in message || 'error' in message) {
+        if ("result" in message || "error" in message) {
           this.handleResponse(message as JsonRpcResponse);
-        } else if ('method' in message && !('id' in message)) {
+        } else if ("method" in message && !("id" in message)) {
           this.handleNotification(message as JsonRpcNotification);
-        } else if ('method' in message && 'id' in message) {
+        } else if ("method" in message && "id" in message) {
           // Server request
-          this.emit('request', message);
+          this.emit("request", message);
         }
       } catch (error) {
         // Silently ignore non-JSON SSE data (comments, heartbeats, etc.)
@@ -256,16 +274,16 @@ export class SSETransport extends Transport {
 
   async send(data: JsonRpcRequest | JsonRpcNotification): Promise<void> {
     const payload = JSON.stringify(data);
-    this.emit('send', data);
+    this.emit("send", data);
 
     return new Promise((resolve, reject) => {
       const urlObj = new URL(this.url);
       const httpModule = this.isHttps ? https : http;
 
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload).toString(),
-        'Accept': 'application/json, text/event-stream',
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload).toString(),
+        Accept: "application/json, text/event-stream",
         ...this.customHeaders,
         ...this.authHeaders,
       };
@@ -274,24 +292,24 @@ export class SSETransport extends Transport {
         hostname: urlObj.hostname,
         port: urlObj.port || (this.isHttps ? 443 : 80),
         path: this.endpoint,
-        method: 'POST',
+        method: "POST",
         headers,
         agent: this.agent,
       };
 
       const req = httpModule.request(options, (res) => {
-        const contentType = res.headers['content-type'] || '';
+        const contentType = res.headers["content-type"] || "";
 
-        let responseData = '';
+        let responseData = "";
 
-        res.on('data', (chunk) => {
+        res.on("data", (chunk) => {
           responseData += chunk;
         });
 
-        res.on('end', () => {
+        res.on("end", () => {
           try {
             // Handle SSE response
-            if (contentType.includes('text/event-stream')) {
+            if (contentType.includes("text/event-stream")) {
               // SSE response - events will be handled by the stream
               // Just resolve the promise
               resolve();
@@ -299,18 +317,18 @@ export class SSETransport extends Transport {
             }
 
             // Handle JSON response
-            if (contentType.includes('application/json')) {
+            if (contentType.includes("application/json")) {
               if (!responseData.trim()) {
                 resolve();
                 return;
               }
 
               const response = JSON.parse(responseData);
-              this.emit('receive', response);
+              this.emit("receive", response);
 
-              if ('result' in response || 'error' in response) {
+              if ("result" in response || "error" in response) {
                 this.handleResponse(response as JsonRpcResponse);
-              } else if ('method' in response && !('id' in response)) {
+              } else if ("method" in response && !("id" in response)) {
                 this.handleNotification(response as JsonRpcNotification);
               }
 
@@ -325,14 +343,14 @@ export class SSETransport extends Transport {
             }
 
             // Handle text/plain - try to parse as JSON first, otherwise accept as-is
-            if (contentType.includes('text/plain')) {
+            if (contentType.includes("text/plain")) {
               try {
                 const response = JSON.parse(responseData);
-                this.emit('receive', response);
+                this.emit("receive", response);
 
-                if ('result' in response || 'error' in response) {
+                if ("result" in response || "error" in response) {
                   this.handleResponse(response as JsonRpcResponse);
-                } else if ('method' in response && !('id' in response)) {
+                } else if ("method" in response && !("id" in response)) {
                   this.handleNotification(response as JsonRpcNotification);
                 }
               } catch {
@@ -345,14 +363,17 @@ export class SSETransport extends Transport {
             // Unexpected response type
             reject(new Error(`Unexpected content type: ${contentType}`));
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            reject(new Error(`Failed to process SSE response: ${errorMessage}`));
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            reject(
+              new Error(`Failed to process SSE response: ${errorMessage}`),
+            );
           }
         });
       });
 
-      req.on('error', (error) => {
-        this.emit('error', error);
+      req.on("error", (error) => {
+        this.emit("error", error);
         reject(error);
       });
 

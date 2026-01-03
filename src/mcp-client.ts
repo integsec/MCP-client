@@ -1,9 +1,9 @@
-import { EventEmitter } from 'events';
-import { Transport } from './transport/base';
-import { StdioTransport } from './transport/stdio';
-import { HttpTransport } from './transport/http';
-import { WebSocketTransport } from './transport/websocket';
-import { SSETransport } from './transport/sse';
+import { EventEmitter } from "events";
+import { Transport } from "./transport/base";
+import { StdioTransport } from "./transport/stdio";
+import { HttpTransport } from "./transport/http";
+import { WebSocketTransport } from "./transport/websocket";
+import { SSETransport } from "./transport/sse";
 import {
   TransportConfig,
   MCPInitializeResult,
@@ -12,7 +12,7 @@ import {
   MCPPrompt,
   TrafficLog,
   MCPClientState,
-} from './types';
+} from "./types";
 
 export class MCPClient extends EventEmitter {
   private transport?: Transport;
@@ -31,55 +31,55 @@ export class MCPClient extends EventEmitter {
   async connect(): Promise<void> {
     // Create appropriate transport
     switch (this.config.type) {
-      case 'stdio':
+      case "stdio":
         if (!this.config.command) {
-          throw new Error('Command required for stdio transport');
+          throw new Error("Command required for stdio transport");
         }
         this.transport = new StdioTransport(
           this.config.command,
           this.config.args || [],
-          this.config.env || {}
+          this.config.env || {},
         );
         break;
 
-      case 'http':
-      case 'https':
+      case "http":
+      case "https":
         if (!this.config.url) {
-          throw new Error('URL required for HTTP transport');
+          throw new Error("URL required for HTTP transport");
         }
         this.transport = new HttpTransport(
           this.config.url,
           this.config.proxy,
           this.config.auth,
           this.config.certificate,
-          this.config.headers
+          this.config.headers,
         );
         break;
 
-      case 'ws':
-      case 'wss':
+      case "ws":
+      case "wss":
         if (!this.config.url) {
-          throw new Error('URL required for WebSocket transport');
+          throw new Error("URL required for WebSocket transport");
         }
         this.transport = new WebSocketTransport(
           this.config.url,
           this.config.proxy,
           this.config.auth,
           this.config.certificate,
-          this.config.headers
+          this.config.headers,
         );
         break;
 
-      case 'sse':
+      case "sse":
         if (!this.config.url) {
-          throw new Error('URL required for SSE transport');
+          throw new Error("URL required for SSE transport");
         }
         this.transport = new SSETransport(
           this.config.url,
           this.config.proxy,
           this.config.auth,
           this.config.certificate,
-          this.config.headers
+          this.config.headers,
         );
         break;
 
@@ -88,22 +88,22 @@ export class MCPClient extends EventEmitter {
     }
 
     // Set up event handlers
-    this.transport.on('send', (data) => {
-      this.logTraffic('sent', data);
-      this.emit('traffic', { direction: 'sent', data });
+    this.transport.on("send", (data) => {
+      this.logTraffic("sent", data);
+      this.emit("traffic", { direction: "sent", data });
     });
 
-    this.transport.on('receive', (data) => {
-      this.logTraffic('received', data);
-      this.emit('traffic', { direction: 'received', data });
+    this.transport.on("receive", (data) => {
+      this.logTraffic("received", data);
+      this.emit("traffic", { direction: "received", data });
     });
 
-    this.transport.on('error', (error) => {
-      this.emit('error', error);
+    this.transport.on("error", (error) => {
+      this.emit("error", error);
     });
 
-    this.transport.on('notification', (notification) => {
-      this.emit('notification', notification);
+    this.transport.on("notification", (notification) => {
+      this.emit("notification", notification);
     });
 
     // Connect transport
@@ -115,7 +115,7 @@ export class MCPClient extends EventEmitter {
     this.state.serverInfo = result.serverInfo;
     this.state.capabilities = result.capabilities;
 
-    this.emit('connected', result);
+    this.emit("connected", result);
 
     // Fetch initial data
     await this.refreshAll();
@@ -125,13 +125,13 @@ export class MCPClient extends EventEmitter {
     if (this.transport) {
       await this.transport.disconnect();
       this.state.connected = false;
-      this.emit('disconnected');
+      this.emit("disconnected");
     }
   }
 
   private async initialize(): Promise<MCPInitializeResult> {
-    const result = await this.transport!.request('initialize', {
-      protocolVersion: '2024-11-05',
+    const result = await this.transport!.request("initialize", {
+      protocolVersion: "2024-11-05",
       capabilities: {
         roots: {
           listChanged: true,
@@ -139,25 +139,29 @@ export class MCPClient extends EventEmitter {
         sampling: {},
       },
       clientInfo: {
-        name: 'mcp-pentester-cli',
-        version: '1.0.0',
+        name: "mcp-pentester-cli",
+        version: "1.0.0",
       },
     });
 
     // Send initialized notification
-    await this.transport!.notify('notifications/initialized');
+    await this.transport!.notify("notifications/initialized");
 
     return result;
   }
 
   async listTools(): Promise<MCPTool[]> {
     try {
-      const result = await this.transport!.request('tools/list');
+      const result = await this.transport!.request("tools/list");
       this.state.tools = result.tools || [];
       return this.state.tools;
     } catch (error: any) {
       // If method not supported, return empty array silently
-      if (error?.message?.includes('not a function') || error?.message?.includes('not found') || error?.code === -32601) {
+      if (
+        error?.message?.includes("not a function") ||
+        error?.message?.includes("not found") ||
+        error?.code === -32601
+      ) {
         this.state.tools = [];
         return [];
       }
@@ -166,7 +170,7 @@ export class MCPClient extends EventEmitter {
   }
 
   async callTool(name: string, args: any = {}): Promise<any> {
-    return await this.transport!.request('tools/call', {
+    return await this.transport!.request("tools/call", {
       name,
       arguments: args,
     });
@@ -174,12 +178,16 @@ export class MCPClient extends EventEmitter {
 
   async listResources(): Promise<MCPResource[]> {
     try {
-      const result = await this.transport!.request('resources/list');
+      const result = await this.transport!.request("resources/list");
       this.state.resources = result.resources || [];
       return this.state.resources;
     } catch (error: any) {
       // If method not supported, return empty array silently
-      if (error?.message?.includes('not a function') || error?.message?.includes('not found') || error?.code === -32601) {
+      if (
+        error?.message?.includes("not a function") ||
+        error?.message?.includes("not found") ||
+        error?.code === -32601
+      ) {
         this.state.resources = [];
         return [];
       }
@@ -188,17 +196,21 @@ export class MCPClient extends EventEmitter {
   }
 
   async readResource(uri: string): Promise<any> {
-    return await this.transport!.request('resources/read', { uri });
+    return await this.transport!.request("resources/read", { uri });
   }
 
   async listPrompts(): Promise<MCPPrompt[]> {
     try {
-      const result = await this.transport!.request('prompts/list');
+      const result = await this.transport!.request("prompts/list");
       this.state.prompts = result.prompts || [];
       return this.state.prompts;
     } catch (error: any) {
       // If method not supported, return empty array silently
-      if (error?.message?.includes('not a function') || error?.message?.includes('not found') || error?.code === -32601) {
+      if (
+        error?.message?.includes("not a function") ||
+        error?.message?.includes("not found") ||
+        error?.code === -32601
+      ) {
         this.state.prompts = [];
         return [];
       }
@@ -207,7 +219,7 @@ export class MCPClient extends EventEmitter {
   }
 
   async getPrompt(name: string, args: any = {}): Promise<any> {
-    return await this.transport!.request('prompts/get', {
+    return await this.transport!.request("prompts/get", {
       name,
       arguments: args,
     });
@@ -240,7 +252,7 @@ export class MCPClient extends EventEmitter {
     this.state.trafficLog = [];
   }
 
-  private logTraffic(direction: 'sent' | 'received', data: any): void {
+  private logTraffic(direction: "sent" | "received", data: any): void {
     this.state.trafficLog.push({
       timestamp: new Date(),
       direction,

@@ -23,12 +23,14 @@ Enter = Execute selected item
 ## Traffic Log Features
 
 ### Real-time Display
+
 - **Most recent at TOP**
 - Timestamps in HH:MM:SS.mmm format
 - Color coded: Yellow (>>>) sent, Green (<<<) received
 - Shows: tool names, parameters, URIs, errors
 
 ### Entry Details
+
 ```
 [12:34:56.789] >>> tools/call tool=read_file args=path
 [12:34:56.890] <<< response id=1
@@ -37,6 +39,7 @@ Enter = Execute selected item
 ```
 
 ### Request/Response Pairing
+
 1. Select any traffic entry
 2. Press Enter
 3. See full request and response side-by-side
@@ -45,12 +48,14 @@ Enter = Execute selected item
 ## Quick Start Commands
 
 ### Local Testing (stdio)
+
 ```bash
 node dist/index.js connect --transport stdio \
   --command npx --args -y @modelcontextprotocol/server-filesystem /tmp
 ```
 
 ### Burp Suite Proxy (HTTP)
+
 ```bash
 node dist/index.js connect --transport http \
   --url http://localhost:3000/mcp \
@@ -58,6 +63,7 @@ node dist/index.js connect --transport http \
 ```
 
 ### Tor Proxy (WebSocket)
+
 ```bash
 node dist/index.js connect --transport wss \
   --url wss://target.onion/mcp \
@@ -66,6 +72,7 @@ node dist/index.js connect --transport wss \
 ```
 
 ### Config File
+
 ```bash
 node dist/index.js connect --config my-config.json
 ```
@@ -98,21 +105,25 @@ node dist/index.js connect --config my-config.json
 ## Common Tasks
 
 ### Execute a Tool
+
 ```
 F1 → Select "Tools" → F2 → ↓ to tool → Enter → Enter params → F4 to close result
 ```
 
 ### Read a Resource
+
 ```
 F1 → Select "Resources" → F2 → ↓ to resource → Enter → F4 to close
 ```
 
 ### View Traffic Detail
+
 ```
 F3 → ↓ to entry → Enter → Review request/response → F4 to close
 ```
 
 ### Refresh Data
+
 ```
 F5 (refreshes current view)
 ```
@@ -131,23 +142,27 @@ F5 (refreshes current view)
 ## Tips & Tricks
 
 ### Efficient Navigation
+
 - Use F1/F2/F3 to jump between panels instantly
 - F4 closes ANY popup immediately
 - F10 for quick exit
 
 ### Traffic Monitoring
+
 - Latest traffic always at top - no scrolling needed
 - Look for ERROR messages (red text)
 - Match request IDs to correlate messages
 - Press Enter on any entry for full details
 
 ### Pentesting Focus
+
 - Tool calls show: tool name + argument names
 - Resource reads show: full URI
 - Errors show: full error message
 - All timestamps for timing analysis
 
 ### Parameter Entry
+
 - Simple strings: just type
 - JSON objects: {"key": "value"}
 - Arrays: ["item1", "item2"]

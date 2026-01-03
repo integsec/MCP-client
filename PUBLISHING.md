@@ -5,6 +5,7 @@ This guide explains how to publish new versions of `@integsec/mcp-pentester-cli`
 ## Prerequisites
 
 1. **npm Account**: You must have an npm account and be logged in
+
    ```bash
    npm login
    ```
@@ -18,6 +19,7 @@ This guide explains how to publish new versions of `@integsec/mcp-pentester-cli`
 ### Using the Publish Script (Recommended)
 
 **Linux/macOS:**
+
 ```bash
 chmod +x publish.sh
 ./publish.sh patch    # For bug fixes (1.0.0 -> 1.0.1)
@@ -27,6 +29,7 @@ chmod +x publish.sh
 ```
 
 **Windows:**
+
 ```cmd
 publish.bat patch
 publish.bat minor
@@ -35,6 +38,7 @@ publish.bat 1.2.3
 ```
 
 The script will:
+
 - Check npm login status
 - Bump the version in `package.json`
 - Build the project
@@ -48,17 +52,20 @@ The script will:
 If you prefer to publish manually:
 
 1. **Update the version** in `package.json`:
+
    ```bash
    npm version patch   # or minor, major
    # Or manually edit package.json
    ```
 
 2. **Build the project**:
+
    ```bash
    npm run build
    ```
 
 3. **Verify what will be published**:
+
    ```bash
    npm pack --dry-run
    ```
@@ -100,12 +107,14 @@ Before publishing, ensure:
 After successfully publishing:
 
 1. **Create a Git Tag**:
+
    ```bash
    git tag v1.0.1
    git push origin v1.0.1
    ```
 
 2. **Commit Version Change**:
+
    ```bash
    git add package.json package-lock.json
    git commit -m "chore: bump version to 1.0.1"
@@ -177,6 +186,7 @@ mcp-pentester-cli --version
 This package is published as a scoped package (`@integsec/mcp-pentester-cli`):
 
 1. Ensure `package.json` has the scoped name:
+
    ```json
    {
      "name": "@integsec/mcp-pentester-cli",
@@ -220,6 +230,7 @@ For automated publishing via CI/CD, you can:
 3. Publish automatically on tags or releases
 
 Example GitHub Actions workflow:
+
 ```yaml
 - name: Publish to npm
   if: startsWith(github.ref, 'refs/tags/v')
@@ -232,6 +243,6 @@ Example GitHub Actions workflow:
 ## Support
 
 For issues with publishing, check:
+
 - [npm documentation](https://docs.npmjs.com/)
 - [npm CLI reference](https://docs.npmjs.com/cli/v8/commands)
-

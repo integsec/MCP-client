@@ -1,13 +1,13 @@
 // JSON-RPC 2.0 types
 export interface JsonRpcRequest {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   method: string;
   params?: any;
   id?: string | number;
 }
 
 export interface JsonRpcResponse {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   result?: any;
   error?: JsonRpcError;
   id: string | number | null;
@@ -20,7 +20,7 @@ export interface JsonRpcError {
 }
 
 export interface JsonRpcNotification {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   method: string;
   params?: any;
 }
@@ -79,7 +79,7 @@ export interface MCPInitializeResult {
 }
 
 // Transport types
-export type TransportType = 'stdio' | 'http' | 'https' | 'ws' | 'wss';
+export type TransportType = "stdio" | "http" | "https" | "ws" | "wss";
 
 export interface TransportConfig {
   type: TransportType;
@@ -93,7 +93,7 @@ export interface TransportConfig {
 export interface ProxyConfig {
   host: string;
   port: number;
-  protocol?: 'http' | 'https' | 'socks' | 'socks5';
+  protocol?: "http" | "https" | "socks" | "socks5";
   auth?: {
     username: string;
     password: string;
@@ -103,7 +103,7 @@ export interface ProxyConfig {
 // Traffic logging
 export interface TrafficLog {
   timestamp: Date;
-  direction: 'sent' | 'received';
+  direction: "sent" | "received";
   transport: TransportType;
   data: JsonRpcRequest | JsonRpcResponse | JsonRpcNotification;
   raw?: string;

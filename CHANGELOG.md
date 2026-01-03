@@ -5,12 +5,14 @@
 ### Major Features
 
 #### IntegSec Branding
+
 - Added IntegSec splash screen on startup with ASCII logo (auto-closes after 2 seconds)
 - IntegSec logo displayed in top-right corner of interface
 - Proprietary licensing protecting commercial use
 - Copyright notices throughout documentation
 
 #### Enhanced Traffic Monitoring
+
 - **Most recent traffic at top** - Latest entries appear first for easier monitoring
 - **Detailed traffic information** including:
   - Timestamps (HH:MM:SS.mmm format)
@@ -26,7 +28,9 @@
   - Red for errors
 
 #### Function Key Navigation (IntegSec Standard)
+
 All navigation now uses function keys for professional pentesting workflow:
+
 - **F1** - Focus navigation sidebar
 - **F2** - Focus main content panel
 - **F3** - Focus traffic log panel
@@ -37,12 +41,14 @@ All navigation now uses function keys for professional pentesting workflow:
 ### Technical Improvements
 
 #### Traffic Analysis
+
 - Request/response pairs automatically matched by JSON-RPC ID
 - Supports viewing either request or response to see the paired message
 - Shows "(pending)" for requests without responses yet
 - Full JSON formatting with syntax highlighting
 
 #### UI/UX Enhancements
+
 - Splash screen on startup with IntegSec branding
 - Logo permanently visible in top-right corner
 - Consistent function key usage across all panels
@@ -52,6 +58,7 @@ All navigation now uses function keys for professional pentesting workflow:
 ### Licensing
 
 This release includes a proprietary IntegSec license:
+
 - Free for internal security testing and education
 - Commercial use requires separate license
 - No redistribution or derivative works allowed
@@ -60,6 +67,7 @@ This release includes a proprietary IntegSec license:
 ### Documentation Updates
 
 All documentation updated with:
+
 - IntegSec branding and copyright notices
 - New function key shortcuts
 - Traffic monitoring capabilities
@@ -69,16 +77,19 @@ All documentation updated with:
 ### Files Changed
 
 **Core Application:**
+
 - `src/ui/tui.ts` - Major UI updates for branding, function keys, and traffic display
 - `package.json` - Updated with IntegSec author and proprietary license
 - `LICENSE` - New proprietary license protecting commercial use
 
 **Documentation:**
+
 - `README.md` - IntegSec branding, new keyboard shortcuts
 - `QUICKSTART.md` - Function keys, traffic features
 - `CHANGELOG.md` - This file
 
 **New Files:**
+
 - `LICENSE` - IntegSec Proprietary Software License
 
 ### Migration Guide
@@ -110,6 +121,7 @@ None reported in this release.
 ### Future Enhancements
 
 Planned for future releases:
+
 - Traffic export to various formats (JSON, HAR, etc.)
 - Traffic filtering and search
 - Replay functionality for requests

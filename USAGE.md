@@ -174,34 +174,34 @@ Result displayed with full content
 
 ### Global Keys (work anywhere)
 
-| Key | Action |
-|-----|--------|
-| `q` | Quit application |
-| `Esc` | Close popup or quit |
-| `Ctrl+C` | Force quit |
-| `F5` | Refresh current view |
+| Key      | Action               |
+| -------- | -------------------- |
+| `q`      | Quit application     |
+| `Esc`    | Close popup or quit  |
+| `Ctrl+C` | Force quit           |
+| `F5`     | Refresh current view |
 
 ### Navigation Keys
 
-| Key | Action |
-|-----|--------|
-| `Tab` | Focus sidebar |
-| `←` (Left) | Focus sidebar |
-| `→` (Right) | Focus main content |
-| `↑` (Up) | Move selection up |
-| `↓` (Down) | Move selection down |
+| Key         | Action              |
+| ----------- | ------------------- |
+| `Tab`       | Focus sidebar       |
+| `←` (Left)  | Focus sidebar       |
+| `→` (Right) | Focus main content  |
+| `↑` (Up)    | Move selection up   |
+| `↓` (Down)  | Move selection down |
 
 ### Action Keys
 
-| Key | Context | Action |
-|-----|---------|--------|
-| `Enter` | Sidebar | Switch to selected view |
-| `Enter` | Tools list | Execute selected tool |
-| `Enter` | Resources list | Read selected resource |
-| `Enter` | Prompts list | Use selected prompt |
-| `Enter` | Traffic list | View traffic detail |
-| `Enter` | Popup | Close popup |
-| `c` | Traffic panel | Clear traffic log |
+| Key     | Context        | Action                  |
+| ------- | -------------- | ----------------------- |
+| `Enter` | Sidebar        | Switch to selected view |
+| `Enter` | Tools list     | Execute selected tool   |
+| `Enter` | Resources list | Read selected resource  |
+| `Enter` | Prompts list   | Use selected prompt     |
+| `Enter` | Traffic list   | View traffic detail     |
+| `Enter` | Popup          | Close popup             |
+| `c`     | Traffic panel  | Clear traffic log       |
 
 ## Tips and Tricks
 
@@ -253,6 +253,7 @@ Result displayed with full content
 ### Pentesting Workflow
 
 1. **Reconnaissance**
+
    ```
    - Navigate to Tools
    - Press F5 to refresh
@@ -262,6 +263,7 @@ Result displayed with full content
    ```
 
 2. **Testing Tools**
+
    ```
    - Select a tool
    - Try normal parameters first
@@ -271,6 +273,7 @@ Result displayed with full content
    ```
 
 3. **Analyzing Traffic**
+
    ```
    - Execute operations
    - Review traffic in real-time
@@ -289,6 +292,7 @@ Result displayed with full content
 ### Development Workflow
 
 1. **Server Testing**
+
    ```
    - Connect to development server
    - Execute all tools to verify

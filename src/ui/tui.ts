@@ -1,6 +1,6 @@
-import blessed from 'blessed';
-import { MCPClient } from '../mcp-client';
-import { MCPTool, MCPResource, MCPPrompt } from '../types';
+import blessed from "blessed";
+import { MCPClient } from "../mcp-client";
+import { MCPTool, MCPResource, MCPPrompt } from "../types";
 
 export class TUI {
   private screen: blessed.Widgets.Screen;
@@ -12,19 +12,28 @@ export class TUI {
     input: blessed.Widgets.TextboxElement;
   };
 
-  private currentView: 'tools' | 'resources' | 'prompts' | 'traffic' = 'tools';
+  private currentView: "tools" | "resources" | "prompts" | "traffic" = "tools";
   private client?: MCPClient;
   private trafficLines: string[] = [];
-  private trafficPairs: Array<{request: any, response: any | null, timestamp: Date}> = [];
-  private activePanel: 'sidebar' | 'main' | 'traffic' = 'sidebar';
+  private trafficPairs: Array<{
+    request: any;
+    response: any | null;
+    timestamp: Date;
+  }> = [];
+  private activePanel: "sidebar" | "main" | "traffic" = "sidebar";
   private pendingRequests = new Map<number | string, any>(); // Track requests waiting for responses
-  private currentPopupContent: { raw: string; rendered: string; title: string; color: string } | null = null;
+  private currentPopupContent: {
+    raw: string;
+    rendered: string;
+    title: string;
+    color: string;
+  } | null = null;
   private showRawInPopup = false;
 
   constructor() {
     this.screen = blessed.screen({
       smartCSR: true,
-      title: 'MCP Pentester CLI - IntegSec',
+      title: "MCP Pentester CLI - IntegSec",
     });
 
     this.layout = this.createLayout();
@@ -34,13 +43,13 @@ export class TUI {
   private showSplashScreen() {
     const splash = blessed.box({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
+      top: "center",
+      left: "center",
       width: 70,
       height: 18,
-      border: { type: 'line' },
+      border: { type: "line" },
       style: {
-        border: { fg: 'cyan', bold: true },
+        border: { fg: "cyan", bold: true },
       },
       content: `{center}{cyan-fg}{bold}
  ██▓ ███▄    █ ▄▄▄█████▓▓█████   ▄████   ██████ ▓█████  ▄████▄
@@ -73,7 +82,7 @@ export class TUI {
     setTimeout(closeHandler, 2000);
 
     // Or close on any keypress
-    this.screen.once('keypress', closeHandler);
+    this.screen.once("keypress", closeHandler);
   }
 
   private createLayout() {
@@ -85,52 +94,53 @@ export class TUI {
       width: 20,
       height: 5,
       tags: true,
-      content: '{right}{cyan-fg}{bold}IntegSec{/bold}\n{gray-fg}Security\nTesting{/gray-fg}{/cyan-fg}{/right}',
+      content:
+        "{right}{cyan-fg}{bold}IntegSec{/bold}\n{gray-fg}Security\nTesting{/gray-fg}{/cyan-fg}{/right}",
       style: {
-        fg: 'cyan',
+        fg: "cyan",
       },
     });
 
     // Sidebar (left panel) - Navigation
     const sidebar = blessed.list({
       parent: this.screen,
-      label: ' Navigation ',
+      label: " Navigation ",
       tags: true,
       top: 0,
       left: 0,
-      width: '20%',
-      height: '70%',
-      border: { type: 'line' },
+      width: "20%",
+      height: "70%",
+      border: { type: "line" },
       style: {
-        border: { fg: 'cyan' },
-        selected: { bg: 'blue', fg: 'white' },
-        item: { fg: 'white' },
+        border: { fg: "cyan" },
+        selected: { bg: "blue", fg: "white" },
+        item: { fg: "white" },
       },
       keys: true,
       vi: true,
       mouse: true,
       items: [
-        '{cyan-fg}Tools{/cyan-fg}',
-        '{cyan-fg}Resources{/cyan-fg}',
-        '{cyan-fg}Prompts{/cyan-fg}',
-        '{cyan-fg}Traffic Log{/cyan-fg}',
+        "{cyan-fg}Tools{/cyan-fg}",
+        "{cyan-fg}Resources{/cyan-fg}",
+        "{cyan-fg}Prompts{/cyan-fg}",
+        "{cyan-fg}Traffic Log{/cyan-fg}",
       ],
     });
 
     // Main panel (center) - Content display (using list for interactivity)
     const main = blessed.list({
       parent: this.screen,
-      label: ' Content ',
+      label: " Content ",
       tags: true,
       top: 0,
-      left: '20%',
-      width: '80%',
-      height: '70%',
-      border: { type: 'line' },
+      left: "20%",
+      width: "80%",
+      height: "70%",
+      border: { type: "line" },
       style: {
-        border: { fg: 'cyan' },
-        selected: { bg: 'blue', fg: 'white' },
-        item: { fg: 'white' },
+        border: { fg: "cyan" },
+        selected: { bg: "blue", fg: "white" },
+        item: { fg: "white" },
       },
       scrollable: true,
       alwaysScroll: true,
@@ -138,8 +148,8 @@ export class TUI {
       vi: true,
       mouse: true,
       scrollbar: {
-        ch: ' ',
-        style: { bg: 'cyan' },
+        ch: " ",
+        style: { bg: "cyan" },
       },
       interactive: true,
     }) as any;
@@ -147,30 +157,30 @@ export class TUI {
     // Status bar
     const status = blessed.box({
       parent: this.screen,
-      top: '70%',
+      top: "70%",
       left: 0,
-      width: '100%',
+      width: "100%",
       height: 3,
       tags: true,
-      border: { type: 'line' },
+      border: { type: "line" },
       style: {
-        border: { fg: 'yellow' },
+        border: { fg: "yellow" },
       },
-      content: '{yellow-fg}Status:{/yellow-fg} Disconnected',
+      content: "{yellow-fg}Status:{/yellow-fg} Disconnected",
     });
 
     // Traffic log (bottom panel)
     const traffic = blessed.box({
       parent: this.screen,
-      label: ' Traffic Log ',
+      label: " Traffic Log ",
       tags: true,
-      top: '73%',
+      top: "73%",
       left: 0,
-      width: '100%',
-      height: '24%',
-      border: { type: 'line' },
+      width: "100%",
+      height: "24%",
+      border: { type: "line" },
       style: {
-        border: { fg: 'green' },
+        border: { fg: "green" },
       },
       scrollable: true,
       alwaysScroll: true,
@@ -178,24 +188,24 @@ export class TUI {
       vi: true,
       mouse: true,
       scrollbar: {
-        ch: ' ',
-        style: { bg: 'green' },
+        ch: " ",
+        style: { bg: "green" },
       },
-      content: '',
+      content: "",
     });
 
     // Input box (hidden by default)
     const input = blessed.textbox({
       parent: this.screen,
-      label: ' Input ',
-      top: 'center',
-      left: 'center',
-      width: '60%',
+      label: " Input ",
+      top: "center",
+      left: "center",
+      width: "60%",
       height: 3,
-      border: { type: 'line' },
+      border: { type: "line" },
       style: {
-        border: { fg: 'magenta' },
-        focus: { border: { fg: 'blue' } },
+        border: { fg: "magenta" },
+        focus: { border: { fg: "blue" } },
       },
       hidden: true,
       inputOnFocus: true,
@@ -208,12 +218,12 @@ export class TUI {
 
   private setupKeyBindings() {
     // F10 - Quit application
-    this.screen.key(['f10', 'C-c'], () => {
+    this.screen.key(["f10", "C-c"], () => {
       return process.exit(0);
     });
 
     // Navigate sidebar
-    this.layout.sidebar.on('select', (item, index) => {
+    this.layout.sidebar.on("select", (item, index) => {
       switch (index) {
         case 0:
           this.showTools();
@@ -229,14 +239,14 @@ export class TUI {
           break;
       }
       // Auto-focus the content pane after selecting from sidebar
-      this.activePanel = 'main';
+      this.activePanel = "main";
       this.updatePanelHighlight();
       this.layout.main.focus();
       this.screen.render();
     });
 
     // F5 - Refresh current view
-    this.screen.key(['f5'], async () => {
+    this.screen.key(["f5"], async () => {
       if (this.client) {
         await this.client.refreshAll();
         this.updateCurrentView();
@@ -244,40 +254,40 @@ export class TUI {
     });
 
     // F1 - Focus sidebar
-    this.screen.key(['f1'], () => {
-      this.activePanel = 'sidebar';
+    this.screen.key(["f1"], () => {
+      this.activePanel = "sidebar";
       this.updatePanelHighlight();
       this.layout.sidebar.focus();
       this.screen.render();
     });
 
     // F2 - Focus main panel
-    this.screen.key(['f2'], () => {
-      this.activePanel = 'main';
+    this.screen.key(["f2"], () => {
+      this.activePanel = "main";
       this.updatePanelHighlight();
       this.layout.main.focus();
       this.screen.render();
     });
 
     // F3 - Focus traffic panel
-    this.screen.key(['f3'], () => {
-      this.activePanel = 'traffic';
+    this.screen.key(["f3"], () => {
+      this.activePanel = "traffic";
       this.updatePanelHighlight();
       this.layout.traffic.focus();
       this.screen.render();
     });
 
     // Handle selection in main panel
-    this.layout.main.key(['enter'], async () => {
+    this.layout.main.key(["enter"], async () => {
       await this.handleMainSelection();
     });
 
     // Clear traffic log with 'c' when focused
-    this.layout.traffic.key(['c'], () => {
+    this.layout.traffic.key(["c"], () => {
       if (this.client) {
         this.client.clearTrafficLog();
         this.trafficLines = [];
-        this.layout.traffic.setContent('');
+        this.layout.traffic.setContent("");
         this.screen.render();
       }
     });
@@ -287,84 +297,99 @@ export class TUI {
     this.client = client;
 
     // Set up event handlers
-    client.on('connected', (result) => {
-      const serverName = result.serverInfo?.name || 'Unknown';
-      const serverVersion = result.serverInfo?.version || '?';
+    client.on("connected", (result) => {
+      const serverName = result.serverInfo?.name || "Unknown";
+      const serverVersion = result.serverInfo?.version || "?";
       this.layout.status.setContent(
         `{green-fg}Connected{/green-fg} to ${this.escapeBlessedTags(serverName)} v${serverVersion} | ` +
-        `{cyan-fg}F1{/cyan-fg}=Nav {cyan-fg}F2{/cyan-fg}=Content {cyan-fg}F3{/cyan-fg}=Traffic {cyan-fg}F4{/cyan-fg}=Close {cyan-fg}F5{/cyan-fg}=Refresh {cyan-fg}F10{/cyan-fg}=Quit | ` +
-        `{bold}{cyan-fg}IntegSec{/cyan-fg}{/bold} {gray-fg}({green-fg}integsec.com{/green-fg}) - Need pentesting? Contact us!{/gray-fg}`
+          `{cyan-fg}F1{/cyan-fg}=Nav {cyan-fg}F2{/cyan-fg}=Content {cyan-fg}F3{/cyan-fg}=Traffic {cyan-fg}F4{/cyan-fg}=Close {cyan-fg}F5{/cyan-fg}=Refresh {cyan-fg}F10{/cyan-fg}=Quit | ` +
+          `{bold}{cyan-fg}IntegSec{/cyan-fg}{/bold} {gray-fg}({green-fg}integsec.com{/green-fg}) - Need pentesting? Contact us!{/gray-fg}`,
       );
       this.updateCurrentView();
       this.screen.render();
     });
 
-    client.on('disconnected', () => {
-      this.layout.status.setContent('{red-fg}Status:{/red-fg} Disconnected');
+    client.on("disconnected", () => {
+      this.layout.status.setContent("{red-fg}Status:{/red-fg} Disconnected");
       this.screen.render();
     });
 
-    client.on('error', (error) => {
+    client.on("error", (error) => {
       this.addTrafficLine(`{red-fg}ERROR:{/red-fg} ${error.message}`);
       this.screen.render();
     });
 
-    client.on('traffic', ({ direction, data }) => {
+    client.on("traffic", ({ direction, data }) => {
       const timestamp = new Date().toISOString().substr(11, 12);
 
-      if (direction === 'sent' && 'method' in data) {
+      if (direction === "sent" && "method" in data) {
         // This is a request
         const method = data.method;
-        let details = '';
+        let details = "";
 
-        if (data.method === 'tools/call' && data.params) {
+        if (data.method === "tools/call" && data.params) {
           details = ` tool=${data.params.name}`;
           if (data.params.arguments) {
             const argKeys = Object.keys(data.params.arguments);
             if (argKeys.length > 0) {
-              details += ` args=${argKeys.join(',')}`;
+              details += ` args=${argKeys.join(",")}`;
             }
           }
-        } else if (data.method === 'resources/read' && data.params) {
+        } else if (data.method === "resources/read" && data.params) {
           details = ` uri=${data.params.uri}`;
-        } else if (data.method === 'prompts/get' && data.params) {
+        } else if (data.method === "prompts/get" && data.params) {
           details = ` prompt=${data.params.name}`;
         }
 
         const requestLine = `{cyan-fg}[${timestamp}]{/cyan-fg} {yellow-fg}>>>{/yellow-fg} ${this.escapeBlessedTags(method + details)}`;
 
-        if ('id' in data && data.id !== undefined) {
+        if ("id" in data && data.id !== undefined) {
           // Store request, waiting for response - store full data for detail view
-          this.pendingRequests.set((data as any).id, { line: requestLine, data, timestamp: new Date() });
+          this.pendingRequests.set((data as any).id, {
+            line: requestLine,
+            data,
+            timestamp: new Date(),
+          });
         } else {
           // Notification (no response expected)
           this.addTrafficLine(requestLine);
         }
-      } else if (direction === 'received') {
+      } else if (direction === "received") {
         // This is a response
-        const responseId = ('id' in data) ? (data as any).id : null;
+        const responseId = "id" in data ? (data as any).id : null;
 
-        let responseLine = '';
-        if ('error' in data && data.error) {
-          const errorMsg = this.escapeBlessedTags(String(data.error.message || 'Unknown error'));
+        let responseLine = "";
+        if ("error" in data && data.error) {
+          const errorMsg = this.escapeBlessedTags(
+            String(data.error.message || "Unknown error"),
+          );
           responseLine = `{cyan-fg}[${timestamp}]{/cyan-fg} {red-fg}<<<{/red-fg} ERROR: ${errorMsg}`;
         } else {
-          const resultPreview = ('result' in data && data.result)
-            ? this.formatResultPreview(data.result)
-            : 'OK';
+          const resultPreview =
+            "result" in data && data.result
+              ? this.formatResultPreview(data.result)
+              : "OK";
           responseLine = `{cyan-fg}[${timestamp}]{/cyan-fg} {green-fg}<<<{/green-fg} ${resultPreview}`;
         }
 
         if (responseId !== null && this.pendingRequests.has(responseId)) {
           // Found matching request - show summary in log, store full data for detail view
-          const { line: requestLine, data: requestData, timestamp: reqTime } = this.pendingRequests.get(responseId)!;
+          const {
+            line: requestLine,
+            data: requestData,
+            timestamp: reqTime,
+          } = this.pendingRequests.get(responseId)!;
           this.pendingRequests.delete(responseId);
 
           // Add summary to traffic log
           this.addTrafficPair(requestLine, responseLine);
 
           // Store full data for detail view
-          this.trafficPairs.unshift({ request: requestData, response: data, timestamp: reqTime });
+          this.trafficPairs.unshift({
+            request: requestData,
+            response: data,
+            timestamp: reqTime,
+          });
           if (this.trafficPairs.length > 50) {
             this.trafficPairs = this.trafficPairs.slice(0, 50);
           }
@@ -380,41 +405,41 @@ export class TUI {
 
   private updatePanelHighlight(): void {
     // Reset all borders to normal
-    this.layout.sidebar.style.border = { fg: 'cyan' };
-    this.layout.main.style.border = { fg: 'cyan' };
-    this.layout.traffic.style.border = { fg: 'green' };
+    this.layout.sidebar.style.border = { fg: "cyan" };
+    this.layout.main.style.border = { fg: "cyan" };
+    this.layout.traffic.style.border = { fg: "green" };
 
     // Highlight active panel with bold yellow border
     switch (this.activePanel) {
-      case 'sidebar':
-        this.layout.sidebar.style.border = { fg: 'yellow', bold: true };
+      case "sidebar":
+        this.layout.sidebar.style.border = { fg: "yellow", bold: true };
         break;
-      case 'main':
-        this.layout.main.style.border = { fg: 'yellow', bold: true };
+      case "main":
+        this.layout.main.style.border = { fg: "yellow", bold: true };
         break;
-      case 'traffic':
-        this.layout.traffic.style.border = { fg: 'yellow', bold: true };
+      case "traffic":
+        this.layout.traffic.style.border = { fg: "yellow", bold: true };
         break;
     }
   }
 
   private showTools() {
-    this.currentView = 'tools';
+    this.currentView = "tools";
     this.updateCurrentView();
   }
 
   private showResources() {
-    this.currentView = 'resources';
+    this.currentView = "resources";
     this.updateCurrentView();
   }
 
   private showPrompts() {
-    this.currentView = 'prompts';
+    this.currentView = "prompts";
     this.updateCurrentView();
   }
 
   private showTrafficLog() {
-    this.currentView = 'traffic';
+    this.currentView = "traffic";
     this.updateCurrentView();
   }
 
@@ -424,26 +449,30 @@ export class TUI {
     const state = this.client.getState();
 
     switch (this.currentView) {
-      case 'tools':
+      case "tools":
         this.displayTools(state.tools);
         break;
-      case 'resources':
+      case "resources":
         this.displayResources(state.resources);
         break;
-      case 'prompts':
+      case "prompts":
         this.displayPrompts(state.prompts);
         break;
-      case 'traffic':
+      case "traffic":
         this.displayTraffic();
         break;
     }
   }
 
   private displayTools(tools: MCPTool[]) {
-    this.layout.main.setLabel(` Tools (${tools.length}) - Press Enter to execute `);
+    this.layout.main.setLabel(
+      ` Tools (${tools.length}) - Press Enter to execute `,
+    );
 
     if (tools.length === 0) {
-      this.layout.main.setItems(['{yellow-fg}No tools available - Press F5 to refresh{/yellow-fg}']);
+      this.layout.main.setItems([
+        "{yellow-fg}No tools available - Press F5 to refresh{/yellow-fg}",
+      ]);
     } else {
       const items = tools.map((tool, idx) => {
         let label = `${idx + 1}. {bold}${tool.name}{/bold}`;
@@ -459,10 +488,14 @@ export class TUI {
   }
 
   private displayResources(resources: MCPResource[]) {
-    this.layout.main.setLabel(` Resources (${resources.length}) - Press Enter to read `);
+    this.layout.main.setLabel(
+      ` Resources (${resources.length}) - Press Enter to read `,
+    );
 
     if (resources.length === 0) {
-      this.layout.main.setItems(['{yellow-fg}No resources available - Press F5 to refresh{/yellow-fg}']);
+      this.layout.main.setItems([
+        "{yellow-fg}No resources available - Press F5 to refresh{/yellow-fg}",
+      ]);
     } else {
       const items = resources.map((resource, idx) => {
         let label = `${idx + 1}. {bold}${resource.name}{/bold} - {gray-fg}${resource.uri}{/gray-fg}`;
@@ -478,10 +511,14 @@ export class TUI {
   }
 
   private displayPrompts(prompts: MCPPrompt[]) {
-    this.layout.main.setLabel(` Prompts (${prompts.length}) - Press Enter to use `);
+    this.layout.main.setLabel(
+      ` Prompts (${prompts.length}) - Press Enter to use `,
+    );
 
     if (prompts.length === 0) {
-      this.layout.main.setItems(['{yellow-fg}No prompts available - Press F5 to refresh{/yellow-fg}']);
+      this.layout.main.setItems([
+        "{yellow-fg}No prompts available - Press F5 to refresh{/yellow-fg}",
+      ]);
     } else {
       const items = prompts.map((prompt, idx) => {
         let label = `${idx + 1}. {bold}${prompt.name}{/bold}`;
@@ -500,10 +537,14 @@ export class TUI {
     if (!this.client) return;
 
     const logs = this.client.getTrafficLog();
-    this.layout.main.setLabel(` Traffic Details (${logs.length}) - Full Request/Response `);
+    this.layout.main.setLabel(
+      ` Traffic Details (${logs.length}) - Full Request/Response `,
+    );
 
     if (logs.length === 0) {
-      this.layout.main.setItems(['{yellow-fg}No traffic logged yet{/yellow-fg}']);
+      this.layout.main.setItems([
+        "{yellow-fg}No traffic logged yet{/yellow-fg}",
+      ]);
     } else {
       // Build full request/response pairs with details
       const items: string[] = [];
@@ -514,7 +555,7 @@ export class TUI {
         const log = logs[i];
 
         // Skip if we already processed this request/response pair
-        if ('id' in log.data) {
+        if ("id" in log.data) {
           const logId = (log.data as any).id;
           if (processedIds.has(logId)) continue;
           processedIds.add(logId);
@@ -524,23 +565,29 @@ export class TUI {
         let requestLog = log;
         let responseLog = null;
 
-        if (log.direction === 'received' && 'id' in log.data) {
+        if (log.direction === "received" && "id" in log.data) {
           const requestId = (log.data as any).id;
           // Find the request
           for (let j = i + 1; j < logs.length; j++) {
-            if (logs[j].direction === 'sent' && 'id' in logs[j].data &&
-                (logs[j].data as any).id === requestId) {
+            if (
+              logs[j].direction === "sent" &&
+              "id" in logs[j].data &&
+              (logs[j].data as any).id === requestId
+            ) {
               requestLog = logs[j];
               responseLog = log;
               break;
             }
           }
-        } else if (log.direction === 'sent' && 'id' in log.data) {
+        } else if (log.direction === "sent" && "id" in log.data) {
           const requestId = (log.data as any).id;
           // Find the response
           for (let j = i - 1; j >= 0; j--) {
-            if (logs[j].direction === 'received' && 'id' in logs[j].data &&
-                (logs[j].data as any).id === requestId) {
+            if (
+              logs[j].direction === "received" &&
+              "id" in logs[j].data &&
+              (logs[j].data as any).id === requestId
+            ) {
               responseLog = logs[j];
               break;
             }
@@ -549,12 +596,17 @@ export class TUI {
 
         // Format as compact single-line entry with timestamp and method
         const timestamp = requestLog.timestamp.toISOString().substr(11, 12);
-        const method = ('method' in requestLog.data) ? requestLog.data.method : 'unknown';
+        const method =
+          "method" in requestLog.data ? requestLog.data.method : "unknown";
         const respStatus = responseLog
-          ? ('error' in responseLog.data ? '{red-fg}ERROR{/red-fg}' : '{green-fg}OK{/green-fg}')
-          : '{gray-fg}pending{/gray-fg}';
+          ? "error" in responseLog.data
+            ? "{red-fg}ERROR{/red-fg}"
+            : "{green-fg}OK{/green-fg}"
+          : "{gray-fg}pending{/gray-fg}";
 
-        items.push(`{gray-fg}[${timestamp}]{/gray-fg} {yellow-fg}${this.escapeBlessedTags(method)}{/yellow-fg} → ${respStatus}`);
+        items.push(
+          `{gray-fg}[${timestamp}]{/gray-fg} {yellow-fg}${this.escapeBlessedTags(method)}{/yellow-fg} → ${respStatus}`,
+        );
       }
 
       this.layout.main.setItems(items);
@@ -565,19 +617,19 @@ export class TUI {
 
   private escapeBlessedTags(text: string): string {
     // Escape curly braces so blessed doesn't try to parse them as tags
-    return text.replace(/{/g, '\\{').replace(/}/g, '\\}');
+    return text.replace(/{/g, "\\{").replace(/}/g, "\\}");
   }
 
   private formatResultPreview(result: any): string {
     let preview: string;
-    if (typeof result === 'string') {
-      preview = result.length > 50 ? result.substring(0, 47) + '...' : result;
+    if (typeof result === "string") {
+      preview = result.length > 50 ? result.substring(0, 47) + "..." : result;
     } else if (Array.isArray(result)) {
       preview = `Array[${result.length}]`;
-    } else if (typeof result === 'object' && result !== null) {
+    } else if (typeof result === "object" && result !== null) {
       const keys = Object.keys(result);
-      if (keys.length === 0) return '{}';
-      preview = `{${keys.slice(0, 3).join(',')}}`;
+      if (keys.length === 0) return "{}";
+      preview = `{${keys.slice(0, 3).join(",")}}`;
     } else {
       preview = String(result);
     }
@@ -595,7 +647,7 @@ export class TUI {
     }
 
     // Update the traffic box content
-    this.layout.traffic.setContent(this.trafficLines.join('\n'));
+    this.layout.traffic.setContent(this.trafficLines.join("\n"));
     this.layout.traffic.setScrollPerc(0);
   }
 
@@ -604,12 +656,12 @@ export class TUI {
     if (this.trafficLines.length > 100) {
       this.trafficLines = this.trafficLines.slice(0, 100);
     }
-    this.layout.traffic.setContent(this.trafficLines.join('\n'));
+    this.layout.traffic.setContent(this.trafficLines.join("\n"));
   }
 
   render() {
     // Set up the main UI first
-    this.activePanel = 'sidebar';
+    this.activePanel = "sidebar";
     this.updatePanelHighlight();
     this.layout.sidebar.focus();
     this.screen.render();
@@ -624,26 +676,25 @@ export class TUI {
       this.layout.input.show();
       this.layout.input.focus();
 
-      this.layout.input.on('submit', (value) => {
+      this.layout.input.on("submit", (value) => {
         this.layout.input.hide();
         this.layout.input.clearValue();
         this.layout.sidebar.focus();
         this.screen.render();
-        resolve(value || '');
+        resolve(value || "");
       });
 
-      this.layout.input.on('cancel', () => {
+      this.layout.input.on("cancel", () => {
         this.layout.input.hide();
         this.layout.input.clearValue();
         this.layout.sidebar.focus();
         this.screen.render();
-        resolve('');
+        resolve("");
       });
 
       this.screen.render();
     });
   }
-
 
   private async handleMainSelection(): Promise<void> {
     if (!this.client) return;
@@ -653,25 +704,25 @@ export class TUI {
 
     try {
       switch (this.currentView) {
-        case 'tools':
+        case "tools":
           if (selectedIndex < state.tools.length) {
             await this.executeTool(state.tools[selectedIndex]);
           }
           break;
 
-        case 'resources':
+        case "resources":
           if (selectedIndex < state.resources.length) {
             await this.readResource(state.resources[selectedIndex]);
           }
           break;
 
-        case 'prompts':
+        case "prompts":
           if (selectedIndex < state.prompts.length) {
             await this.usePrompt(state.prompts[selectedIndex]);
           }
           break;
 
-        case 'traffic':
+        case "traffic":
           const logs = this.client.getTrafficLog().slice(-50);
           if (selectedIndex < logs.length) {
             await this.showTrafficDetail(logs[selectedIndex]);
@@ -679,7 +730,7 @@ export class TUI {
           break;
       }
     } catch (error: any) {
-      this.showMessage('Error', error.message || String(error), 'red');
+      this.showMessage("Error", error.message || String(error), "red");
     }
   }
 
@@ -693,7 +744,7 @@ export class TUI {
 
       for (const paramName of Object.keys(props)) {
         const isRequired = required.includes(paramName);
-        const prompt = `${paramName}${isRequired ? ' (required)' : ' (optional)'}:`;
+        const prompt = `${paramName}${isRequired ? " (required)" : " (optional)"}:`;
 
         const value = await this.prompt(prompt);
 
@@ -710,7 +761,7 @@ export class TUI {
 
     const result = await this.client!.callTool(tool.name, args);
     const formatted = this.formatForDisplay(result);
-    this.showMessage(`Tool Result: ${tool.name}`, formatted, 'green');
+    this.showMessage(`Tool Result: ${tool.name}`, formatted, "green");
   }
 
   private async readResource(resource: MCPResource): Promise<void> {
@@ -726,7 +777,11 @@ export class TUI {
         const value = await this.prompt(`Enter value for {${paramName}}:`);
 
         if (!value) {
-          this.showMessage('Error', `Parameter {${paramName}} is required`, 'red');
+          this.showMessage(
+            "Error",
+            `Parameter {${paramName}} is required`,
+            "red",
+          );
           return;
         }
 
@@ -737,7 +792,7 @@ export class TUI {
 
     const result = await this.client!.readResource(uri);
     const formatted = this.formatForDisplay(result);
-    this.showMessage(`Resource: ${resource.name}`, formatted, 'cyan');
+    this.showMessage(`Resource: ${resource.name}`, formatted, "cyan");
   }
 
   private async usePrompt(prompt: MCPPrompt): Promise<void> {
@@ -746,7 +801,7 @@ export class TUI {
     if (prompt.arguments && prompt.arguments.length > 0) {
       for (const arg of prompt.arguments) {
         const isRequired = arg.required || false;
-        const promptText = `${arg.name}${isRequired ? ' (required)' : ' (optional)'}:`;
+        const promptText = `${arg.name}${isRequired ? " (required)" : " (optional)"}:`;
 
         const value = await this.prompt(promptText);
 
@@ -758,7 +813,7 @@ export class TUI {
 
     const result = await this.client!.getPrompt(prompt.name, args);
     const formatted = this.formatForDisplay(result);
-    this.showMessage(`Prompt: ${prompt.name}`, formatted, 'magenta');
+    this.showMessage(`Prompt: ${prompt.name}`, formatted, "magenta");
   }
 
   private async showTrafficDetail(log: any): Promise<void> {
@@ -770,14 +825,18 @@ export class TUI {
     let responseLog = null;
 
     // If this is a response, find its request
-    if (log.direction === 'received' && 'id' in log.data) {
+    if (log.direction === "received" && "id" in log.data) {
       const requestId = (log.data as any).id;
       if (requestId !== undefined && requestId !== null) {
         // Look backwards for the request with matching ID
         for (let i = logIndex + 1; i < logs.length; i++) {
           const logData = logs[i].data as any;
-          if (logs[i].direction === 'sent' && 'id' in logs[i].data &&
-              logData.id !== undefined && logData.id === requestId) {
+          if (
+            logs[i].direction === "sent" &&
+            "id" in logs[i].data &&
+            logData.id !== undefined &&
+            logData.id === requestId
+          ) {
             requestLog = logs[i];
             responseLog = log;
             break;
@@ -786,14 +845,18 @@ export class TUI {
       }
     }
     // If this is a request, find its response
-    else if (log.direction === 'sent' && 'id' in log.data) {
+    else if (log.direction === "sent" && "id" in log.data) {
       const requestId = (log.data as any).id;
       if (requestId !== undefined && requestId !== null) {
         // Look backwards for response with matching ID
         for (let i = logIndex - 1; i >= 0; i--) {
           const logData = logs[i].data as any;
-          if (logs[i].direction === 'received' && 'id' in logs[i].data &&
-              logData.id !== undefined && logData.id === requestId) {
+          if (
+            logs[i].direction === "received" &&
+            "id" in logs[i].data &&
+            logData.id !== undefined &&
+            logData.id === requestId
+          ) {
             responseLog = logs[i];
             break;
           }
@@ -805,11 +868,11 @@ export class TUI {
     const requestJson = this.formatForDisplay(requestLog.data);
     const responseJson = responseLog
       ? this.formatForDisplay(responseLog.data)
-      : '(pending - no response yet)';
+      : "(pending - no response yet)";
 
     // Split into lines for side-by-side display
-    const requestLines = requestJson.split('\n');
-    const responseLines = responseJson.split('\n');
+    const requestLines = requestJson.split("\n");
+    const responseLines = responseJson.split("\n");
     const maxLines = Math.max(requestLines.length, responseLines.length);
 
     // Calculate column width (half of 90% screen width, minus separator)
@@ -817,33 +880,43 @@ export class TUI {
 
     // Build side-by-side display
     const lines: string[] = [];
-    lines.push(`{bold}{yellow-fg}REQUEST{/yellow-fg}{/bold} - ${requestLog.timestamp.toISOString()}`.padEnd(colWidth) +
-               ' {gray-fg}│{/gray-fg} ' +
-               `{bold}{green-fg}RESPONSE{/green-fg}{/bold}${responseLog ? ' - ' + responseLog.timestamp.toISOString() : ''}`);
-    lines.push(`{gray-fg}${'─'.repeat(colWidth)}{/gray-fg} {gray-fg}┼{/gray-fg} {gray-fg}${'─'.repeat(colWidth)}{/gray-fg}`);
+    lines.push(
+      `{bold}{yellow-fg}REQUEST{/yellow-fg}{/bold} - ${requestLog.timestamp.toISOString()}`.padEnd(
+        colWidth,
+      ) +
+        " {gray-fg}│{/gray-fg} " +
+        `{bold}{green-fg}RESPONSE{/green-fg}{/bold}${responseLog ? " - " + responseLog.timestamp.toISOString() : ""}`,
+    );
+    lines.push(
+      `{gray-fg}${"─".repeat(colWidth)}{/gray-fg} {gray-fg}┼{/gray-fg} {gray-fg}${"─".repeat(colWidth)}{/gray-fg}`,
+    );
 
     for (let i = 0; i < maxLines; i++) {
-      const reqLine = requestLines[i] || '';
-      const respLine = responseLines[i] || '';
+      const reqLine = requestLines[i] || "";
+      const respLine = responseLines[i] || "";
 
       // Pad request line to column width
       const paddedReq = reqLine.padEnd(colWidth).substring(0, colWidth);
-      lines.push(paddedReq + ' {gray-fg}│{/gray-fg} ' + respLine);
+      lines.push(paddedReq + " {gray-fg}│{/gray-fg} " + respLine);
     }
 
-    this.showMessage('Traffic Detail - Request/Response Pair', lines.join('\n'), 'cyan');
+    this.showMessage(
+      "Traffic Detail - Request/Response Pair",
+      lines.join("\n"),
+      "cyan",
+    );
   }
 
   private formatXML(xml: string): string {
     // Simple XML formatter with indentation
-    let formatted = '';
+    let formatted = "";
     let indent = 0;
-    const tab = '  ';
+    const tab = "  ";
 
     xml.split(/>\s*</).forEach((node, index) => {
       // Add back the angle brackets
-      if (index > 0) node = '<' + node;
-      if (index < xml.split(/>\s*</).length - 1) node = node + '>';
+      if (index > 0) node = "<" + node;
+      if (index < xml.split(/>\s*</).length - 1) node = node + ">";
 
       // Check if it's a closing tag
       if (node.match(/^<\/\w/)) {
@@ -851,7 +924,7 @@ export class TUI {
       }
 
       // Add the indented line
-      formatted += tab.repeat(Math.max(0, indent)) + node + '\n';
+      formatted += tab.repeat(Math.max(0, indent)) + node + "\n";
 
       // Check if it's an opening tag (not self-closing and not closing)
       if (node.match(/^<\w[^>]*[^\/]>$/)) {
@@ -861,17 +934,17 @@ export class TUI {
 
     // Add syntax highlighting for XML
     return formatted
-      .replace(/<(\/?[\w:]+)/g, '{cyan-fg}<$1{/cyan-fg}')  // Tag names
-      .replace(/([\w:]+)=/g, '{yellow-fg}$1{/yellow-fg}=')  // Attributes
-      .replace(/="([^"]*)"/g, '="{green-fg}$1{/green-fg}"')  // Attribute values
-      .replace(/>/g, '{cyan-fg}>{/cyan-fg}');  // Closing brackets
+      .replace(/<(\/?[\w:]+)/g, "{cyan-fg}<$1{/cyan-fg}") // Tag names
+      .replace(/([\w:]+)=/g, "{yellow-fg}$1{/yellow-fg}=") // Attributes
+      .replace(/="([^"]*)"/g, '="{green-fg}$1{/green-fg}"') // Attribute values
+      .replace(/>/g, "{cyan-fg}>{/cyan-fg}"); // Closing brackets
   }
 
   private formatForDisplay(data: any): string {
     // Smart formatter for better readability
-    if (typeof data === 'string') {
+    if (typeof data === "string") {
       // Check if it's XML
-      if (data.trim().startsWith('<') && data.trim().includes('</')) {
+      if (data.trim().startsWith("<") && data.trim().includes("</")) {
         try {
           return this.formatXML(data);
         } catch {
@@ -886,26 +959,26 @@ export class TUI {
 
         // Add color hints for better readability
         return json
-          .replace(/"([^"]+)":/g, '{cyan-fg}"$1"{/cyan-fg}:')  // Property names
-          .replace(/: "([^"]*?)"/g, ': {green-fg}"$1"{/green-fg}')  // String values
-          .replace(/: (\d+)/g, ': {yellow-fg}$1{/yellow-fg}')  // Numbers
-          .replace(/: (true|false|null)/g, ': {magenta-fg}$1{/magenta-fg}');  // Keywords
+          .replace(/"([^"]+)":/g, '{cyan-fg}"$1"{/cyan-fg}:') // Property names
+          .replace(/: "([^"]*?)"/g, ': {green-fg}"$1"{/green-fg}') // String values
+          .replace(/: (\d+)/g, ": {yellow-fg}$1{/yellow-fg}") // Numbers
+          .replace(/: (true|false|null)/g, ": {magenta-fg}$1{/magenta-fg}"); // Keywords
       } catch {
         // Not JSON, return as-is
         return data;
       }
     }
 
-    if (typeof data === 'object' && data !== null) {
+    if (typeof data === "object" && data !== null) {
       // Format objects with syntax highlighting hints
       const json = JSON.stringify(data, null, 2);
 
       // Add color hints for better readability
       return json
-        .replace(/"([^"]+)":/g, '{cyan-fg}"$1"{/cyan-fg}:')  // Property names
-        .replace(/: "([^"]*?)"/g, ': {green-fg}"$1"{/green-fg}')  // String values
-        .replace(/: (\d+)/g, ': {yellow-fg}$1{/yellow-fg}')  // Numbers
-        .replace(/: (true|false|null)/g, ': {magenta-fg}$1{/magenta-fg}');  // Keywords
+        .replace(/"([^"]+)":/g, '{cyan-fg}"$1"{/cyan-fg}:') // Property names
+        .replace(/: "([^"]*?)"/g, ': {green-fg}"$1"{/green-fg}') // String values
+        .replace(/: (\d+)/g, ": {yellow-fg}$1{/yellow-fg}") // Numbers
+        .replace(/: (true|false|null)/g, ": {magenta-fg}$1{/magenta-fg}"); // Keywords
     }
 
     return String(data);
@@ -914,21 +987,26 @@ export class TUI {
   private showMessage(title: string, content: string, color: string): void {
     // Store both raw and rendered versions
     const rawContent = content;
-    const renderedContent = content.replace(/\\n/g, '\n').replace(/\\t/g, '  ');
+    const renderedContent = content.replace(/\\n/g, "\n").replace(/\\t/g, "  ");
 
     // Store for toggling
-    this.currentPopupContent = { raw: rawContent, rendered: renderedContent, title, color };
+    this.currentPopupContent = {
+      raw: rawContent,
+      rendered: renderedContent,
+      title,
+      color,
+    };
     this.showRawInPopup = false;
 
     const msg = blessed.box({
       parent: this.screen,
-      top: 'center',
-      left: 'center',
-      width: '90%',
-      height: '85%',
+      top: "center",
+      left: "center",
+      width: "90%",
+      height: "85%",
       label: ` ${title} - F4/ESC=close W=toggle PgUp/PgDn=scroll `,
       tags: true,
-      border: { type: 'line' },
+      border: { type: "line" },
       style: {
         border: { fg: color, bold: true },
       },
@@ -938,41 +1016,47 @@ export class TUI {
       vi: true,
       mouse: true,
       scrollbar: {
-        ch: '█',
+        ch: "█",
         track: {
-          ch: '░',
+          ch: "░",
         },
         style: {
           fg: color,
-          bg: 'black',
+          bg: "black",
         },
       },
       content: this.showRawInPopup ? rawContent : renderedContent,
     });
 
     // Page Up/Page Down for scrolling
-    msg.key(['pageup'], () => {
+    msg.key(["pageup"], () => {
       msg.scroll(-10);
       this.screen.render();
     });
 
-    msg.key(['pagedown'], () => {
+    msg.key(["pagedown"], () => {
       msg.scroll(10);
       this.screen.render();
     });
 
     // W to toggle between raw and rendered
-    msg.key(['w', 'W'], () => {
+    msg.key(["w", "W"], () => {
       this.showRawInPopup = !this.showRawInPopup;
       if (this.currentPopupContent) {
-        msg.setContent(this.showRawInPopup ? this.currentPopupContent.raw : this.currentPopupContent.rendered);
-        msg.setLabel(` ${this.currentPopupContent.title} - Press F4/ESC to close, W to toggle raw/rendered ${this.showRawInPopup ? '(RAW)' : '(RENDERED)'} `);
+        msg.setContent(
+          this.showRawInPopup
+            ? this.currentPopupContent.raw
+            : this.currentPopupContent.rendered,
+        );
+        msg.setLabel(
+          ` ${this.currentPopupContent.title} - Press F4/ESC to close, W to toggle raw/rendered ${this.showRawInPopup ? "(RAW)" : "(RENDERED)"} `,
+        );
         this.screen.render();
       }
     });
 
     // F4 or ESC to close
-    msg.key(['f4', 'escape', 'enter'], () => {
+    msg.key(["f4", "escape", "enter"], () => {
       this.currentPopupContent = null;
       this.showRawInPopup = false;
       msg.destroy();

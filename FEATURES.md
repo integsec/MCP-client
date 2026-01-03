@@ -1,6 +1,6 @@
 # MCP Pentester CLI - Feature Documentation
 
-**IntegSec Proprietary Tool - Copyright © 2025 IntegSec**
+**MCP Pentester CLI - Copyright © 2025 IntegSec. All Rights Reserved.**
 
 ## Visual Enhancements
 

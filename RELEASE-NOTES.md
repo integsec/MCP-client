@@ -1,6 +1,6 @@
 # MCP Pentester CLI - Release Notes v1.0.0
 
-**IntegSec Proprietary Tool**
+**MCP Pentester CLI - Free and Open Source**
 **Copyright © 2025 IntegSec. All Rights Reserved.**
 
 ## What's New
@@ -10,7 +10,7 @@
   - Auto-closes after 2 seconds
   - Press any key to close immediately
 - **Permanent Logo**: IntegSec branding visible in top-right corner
-- **Proprietary License**: Commercial use requires separate license agreement
+- **Free and Open Source**: Available under a permissive license with IP protection
 
 ### Enhanced Visual Experience
 
@@ -152,7 +152,7 @@ node dist/index.js connect --config my-config.json
 
 ## Licensing
 
-This software is proprietary and confidential to IntegSec.
+This software is free and open source, with all intellectual property rights reserved by IntegSec.
 
 **Free Use:**
 - Internal security testing
@@ -202,4 +202,4 @@ See LICENSE file for complete terms and conditions.
 
 *Build Date: January 2, 2025*
 *Version: 1.0.0*
-*License: Proprietary*
+*License: Free and Open Source (IP Protected)*

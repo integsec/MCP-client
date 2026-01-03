@@ -1,6 +1,6 @@
 # MCP Pentester CLI - Quick Reference Card
 
-**IntegSec Proprietary Tool - Copyright © 2025 IntegSec**
+**MCP Pentester CLI - Copyright © 2025 IntegSec. All Rights Reserved.**
 
 ## Function Keys (IntegSec Standard)
 

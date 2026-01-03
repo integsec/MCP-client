@@ -10,7 +10,7 @@ import * as path from 'path';
 const program = new Command();
 
 program
-  .name('mcp-cli')
+  .name('mcp-pentester-cli')
   .description('Interactive console tool for pentesting MCP servers via JSON-RPC 2.0')
   .version('1.0.0');
 
@@ -163,7 +163,7 @@ program
 
     console.log(`Example configurations written to: ${outputPath}`);
     console.log('\nExample usage:');
-    console.log(`  mcp-cli connect --config ${outputPath} --transport stdio`);
+    console.log(`  mcp-pentester-cli connect --config ${outputPath} --transport stdio`);
     console.log('  (Edit the file to select a specific config by extracting one transport)');
   });
 

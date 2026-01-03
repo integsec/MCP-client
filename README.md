@@ -1,8 +1,6 @@
 # MCP Pentester CLI
 
-**IntegSec Proprietary Security Tool**
-
-An interactive console tool for penetration testers to interact with Model Context Protocol (MCP) servers via JSON-RPC 2.0. Supports multiple transport protocols (stdio, HTTP/HTTPS, WebSocket) with full proxy support for tools like Burp Suite.
+A free, open-source interactive console tool for penetration testers to interact with Model Context Protocol (MCP) servers via JSON-RPC 2.0. Supports multiple transport protocols (stdio, HTTP/HTTPS, WebSocket) with full proxy support for tools like Burp Suite.
 
 ![My screenshot](client-screenshot.png)
 
@@ -39,35 +37,58 @@ An interactive console tool for penetration testers to interact with Model Conte
 
 ## Installation
 
+### Install from npm
+
+```bash
+npm install -g mcp-pentester-cli
+```
+
+After installation, verify it works:
+
+```bash
+mcp-pentester-cli --version
+```
+
+Then use the `mcp-pentester-cli` command:
+
+```bash
+mcp-pentester-cli --help
+mcp-pentester-cli connect --transport stdio --command "npx" --args "-y" "@modelcontextprotocol/server-filesystem" "/tmp"
+```
+
+### Install from source
+
 ```bash
 npm install
 npm run build
 ```
 
-Or install globally:
+Or install globally from source:
 
 ```bash
 npm install -g .
 ```
+
+After global installation, use the `mcp-pentester-cli` command as shown above.
 
 ## Quick Start
 
 ### Connect to an MCP server via stdio
 
 ```bash
-mcp-cli connect --transport stdio --command "npx" --args "-y" "@modelcontextprotocol/server-filesystem" "/tmp"
+mcp-pentester-cli connect --transport stdio --command "npx" --args "-y" "@modelcontextprotocol/server-filesystem" "/tmp"
 ```
 
 ### Connect via HTTP through Burp Suite
 
 ```bash
-mcp-cli connect --transport http --url "http://localhost:3000/mcp" --proxy-host 127.0.0.1 --proxy-port 8080
+mcp-pentester-cli connect --transport http --url "http://localhost:3000/mcp" --proxy-host 127.0.0.1 --proxy-port 8080
 ```
 
 ### Connect via WebSocket through SOCKS5 (Tor)
 
 ```bash
-mcp-cli connect --transport wss --url "wss://api.example.com/mcp" --proxy-host 127.0.0.1 --proxy-port 9050 --proxy-protocol socks5
+mcp-pentester-cli connect --transport wss --url "wss://api.example.com/mcp" --proxy-host 127.0.0.1 --proxy-port 9050 --proxy-protocol socks5
 ```
 
 ### Using Configuration Files
@@ -75,13 +96,13 @@ mcp-cli connect --transport wss --url "wss://api.example.com/mcp" --proxy-host 1
 Generate example configs:
 
 ```bash
-mcp-cli gen-config -o my-config.json
+mcp-pentester-cli gen-config -o my-config.json
 ```
 
 Connect using a config file:
 
 ```bash
-mcp-cli connect --config examples/http-burp-config.json
+mcp-pentester-cli connect --config examples/http-burp-config.json
 ```
 
 ## Usage
@@ -89,7 +110,7 @@ mcp-cli connect --config examples/http-burp-config.json
 ### Command Line Options
 
 ```
-mcp-cli connect [options]
+mcp-pentester-cli connect [options]
 
 Options:
   -t, --transport <type>        Transport type: stdio, http, https, ws, wss (default: "stdio")
@@ -200,7 +221,7 @@ Options:
 
 2. **Launch MCP CLI with Proxy**
    ```bash
-   mcp-cli connect --transport https --url "https://target.com/mcp" \
+   mcp-pentester-cli connect --transport https --url "https://target.com/mcp" \
      --proxy-host 127.0.0.1 --proxy-port 8080
    ```
 
@@ -306,9 +327,9 @@ src/
 
 ## License
 
-This software is proprietary and confidential to IntegSec. See the LICENSE file for full terms and conditions.
+This software is free and open source. See the LICENSE file for full terms and conditions.
 
-**Commercial use requires a separate license agreement. Contact: licensing@integsec.com**
+**Copyright © 2025 IntegSec. All Rights Reserved.** This software is provided free of charge, but all intellectual property rights are reserved by IntegSec.
 
 ## Contributing
 

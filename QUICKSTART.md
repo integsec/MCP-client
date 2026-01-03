@@ -182,7 +182,7 @@ Make sure you run from the project directory or install globally:
 
 ```bash
 npm install -g .
-mcp-cli connect --help
+mcp-pentester-cli connect --help
 ```
 
 ### Proxy not intercepting traffic

@@ -1,0 +1,46 @@
+# Source files (only dist is needed)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+tsconfig.json
+.gitignore
+.npmignore
+
+# Development scripts
+test-*.sh
+test-*.bat
+debug-*.sh
+
+# Documentation (keep README.md and LICENSE)
+ARCHITECTURE.md
+CHANGELOG.md
+FEATURES.md
+FIXES.md
+PENTESTING.md
+QUICK-REFERENCE.md
+QUICKSTART.md
+RELEASE-NOTES.md
+USAGE.md
+
+# Development configs
+test-config.json
+.vscode/
+.idea/
+
+# Build artifacts that shouldn't be published
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+coverage/
+
+# Node modules (always excluded automatically)
+node_modules/
+
+# Environment files
+.env
+.env.*
+

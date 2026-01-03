@@ -7,7 +7,7 @@
 #### IntegSec Branding
 - Added IntegSec splash screen on startup with ASCII logo (auto-closes after 2 seconds)
 - IntegSec logo displayed in top-right corner of interface
-- Proprietary licensing protecting commercial use
+- Free and open source license with IP protection
 - Copyright notices throughout documentation
 
 #### Enhanced Traffic Monitoring
@@ -51,11 +51,11 @@ All navigation now uses function keys for professional pentesting workflow:
 
 ### Licensing
 
-This release includes a proprietary IntegSec license:
-- Free for internal security testing and education
-- Commercial use requires separate license
-- No redistribution or derivative works allowed
-- Full intellectual property protection
+This release includes a free and open source license with IP protection:
+- Free for use, modification, and distribution
+- All intellectual property rights reserved by IntegSec
+- Permissive license allowing commercial and non-commercial use
+- Copyright and IP protection maintained
 
 ### Documentation Updates
 
@@ -70,8 +70,8 @@ All documentation updated with:
 
 **Core Application:**
 - `src/ui/tui.ts` - Major UI updates for branding, function keys, and traffic display
-- `package.json` - Updated with IntegSec author and proprietary license
-- `LICENSE` - New proprietary license protecting commercial use
+- `package.json` - Updated with IntegSec author and free open source license
+- `LICENSE` - New permissive license with IP protection
 
 **Documentation:**
 - `README.md` - IntegSec branding, new keyboard shortcuts
@@ -79,7 +79,7 @@ All documentation updated with:
 - `CHANGELOG.md` - This file
 
 **New Files:**
-- `LICENSE` - IntegSec Proprietary Software License
+- `LICENSE` - IntegSec Software License (free and open source with IP protection)
 
 ### Migration Guide
 

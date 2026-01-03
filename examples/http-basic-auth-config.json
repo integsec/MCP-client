@@ -1,0 +1,9 @@
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "basic",
+    "username": "admin",
+    "password": "secret"
+  }
+}

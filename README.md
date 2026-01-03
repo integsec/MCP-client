@@ -13,10 +13,16 @@ A free, open-source interactive console tool for penetration testers to interact
   - HTTP/HTTPS
   - WebSocket (ws/wss)
 
+- **Authentication Support**
+  - Bearer token authentication
+  - HTTP Basic authentication
+  - Custom header authentication
+  - Client certificate (mTLS) support
+
 - **Proxy Support**
   - HTTP/HTTPS proxies (Burp Suite, etc.)
   - SOCKS5 proxies (Tor, etc.)
-  - Authentication support
+  - Proxy authentication support
 
 - **Interactive TUI**
   - Graphical console interface using blessed
@@ -40,8 +46,10 @@ A free, open-source interactive console tool for penetration testers to interact
 ### Install from npm
 
 ```bash
-npm install -g mcp-pentester-cli
+npm install -g @integsec/mcp-pentester-cli
 ```
+<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
+run_terminal_cmd
 
 After installation, verify it works:
 
@@ -70,6 +78,31 @@ npm install -g .
 ```
 
 After global installation, use the `mcp-pentester-cli` command as shown above.
+
+## Connection Management
+
+### Automatic Connection Saving
+
+When you successfully connect to an MCP server, the connection configuration is automatically saved to a `.mcp-connection.json` file in the current directory. This allows you to easily reconnect to the same server later without typing all the connection details again.
+
+**Saved connection files:**
+- Format: `{server-name}-{timestamp}.mcp-connection.json`
+- Location: Current working directory
+- Compatible with the `--config` command-line option
+
+### Switching Between Saved Connections
+
+Press **F6** in the TUI to view a list of all saved connections in the current directory. You can:
+- Navigate the list with ↑/↓
+- Press **Enter** to switch to a selected connection
+- Press **F4** or **ESC** to close the connection list
+
+The connection list shows:
+- Server name
+- Connection timestamp
+- Sorted by most recent first
+
+**Example:** If you've connected to multiple servers, you can quickly switch between them without restarting the application.
 
 ## Quick Start
 
@@ -113,17 +146,34 @@ mcp-pentester-cli connect --config examples/http-burp-config.json
 mcp-pentester-cli connect [options]
 
 Options:
-  -t, --transport <type>        Transport type: stdio, http, https, ws, wss (default: "stdio")
-  -u, --url <url>               URL for HTTP/WebSocket transports
-  -c, --command <command>       Command for stdio transport
-  -a, --args <args...>          Arguments for stdio command
-  --proxy-host <host>           Proxy server host
-  --proxy-port <port>           Proxy server port
-  --proxy-protocol <protocol>   Proxy protocol: http, https, socks, socks5
-  --proxy-user <username>       Proxy username
-  --proxy-pass <password>       Proxy password
-  -f, --config <file>           Load configuration from JSON file
-  -h, --help                    Display help for command
+  -t, --transport <type>          Transport type: stdio, http, https, ws, wss (default: "stdio")
+  -u, --url <url>                 URL for HTTP/WebSocket transports
+  -c, --command <command>         Command for stdio transport
+  -a, --args <args...>            Arguments for stdio command
+
+  Authentication:
+  --auth-type <type>              Authentication type: bearer, basic, custom
+  --auth-token <token>            Bearer token for authentication
+  --auth-user <username>          Username for basic authentication
+  --auth-pass <password>          Password for basic authentication
+  --header <header...>            Custom headers (format: "Key: Value")
+
+  TLS/Certificates:
+  --cert <path>                   Path to client certificate file
+  --key <path>                    Path to client certificate key file
+  --ca <path>                     Path to CA certificate file
+  --cert-passphrase <passphrase>  Passphrase for encrypted certificate key
+  --insecure                      Disable TLS certificate verification (dangerous)
+
+  Proxy:
+  --proxy-host <host>             Proxy server host
+  --proxy-port <port>             Proxy server port
+  --proxy-protocol <protocol>     Proxy protocol: http, https, socks, socks5
+  --proxy-user <username>         Proxy username
+  --proxy-pass <password>         Proxy password
+
+  -f, --config <file>             Load configuration from JSON file
+  -h, --help                      Display help for command
 ```
 
 ### Configuration File Format
@@ -132,6 +182,18 @@ Options:
 {
   "type": "https",
   "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "bearer",
+    "token": "your-bearer-token"
+  },
+  "headers": {
+    "X-Custom-Header": "value"
+  },
+  "certificate": {
+    "cert": "/path/to/cert.pem",
+    "key": "/path/to/key.pem",
+    "ca": "/path/to/ca.pem"
+  },
   "proxy": {
     "host": "127.0.0.1",
     "port": 8080,
@@ -144,6 +206,31 @@ Options:
 }
 ```
 
+**Available configuration options:**
+
+- `type` - Transport type: `stdio`, `http`, `https`, `ws`, `wss`
+- `url` - Server URL (for HTTP/WebSocket transports)
+- `command` - Command to execute (for stdio transport)
+- `args` - Command arguments array (for stdio transport)
+- `env` - Environment variables object (for stdio transport)
+- `auth` - Authentication configuration:
+  - `type` - Auth type: `bearer`, `basic`, or `custom`
+  - `token` - Bearer token (for bearer auth)
+  - `username`/`password` - Credentials (for basic auth)
+  - `headers` - Custom auth headers object (for custom auth)
+- `headers` - Custom HTTP headers object
+- `certificate` - TLS certificate configuration:
+  - `cert` - Path to client certificate
+  - `key` - Path to client private key
+  - `ca` - Path to CA certificate
+  - `passphrase` - Key passphrase (optional)
+  - `rejectUnauthorized` - Verify server certificate (default: true)
+- `proxy` - Proxy configuration:
+  - `host` - Proxy server hostname
+  - `port` - Proxy server port
+  - `protocol` - Proxy protocol: `http`, `https`, `socks`, `socks5`
+  - `auth` - Proxy authentication (username/password)
+
 ### TUI Keyboard Shortcuts
 
 **Function Keys:**
@@ -152,6 +239,7 @@ Options:
 - **F3** - Focus traffic log panel
 - **F4** - Close popup window
 - **F5** - Refresh current view
+- **F6** - Show saved connections (switch between previously saved connections)
 - **F10** - Quit application
 
 **Navigation:**
@@ -171,6 +259,109 @@ Options:
 4. **Traffic Log** - View detailed JSON-RPC traffic
 
 ## Example Configurations
+
+### Bearer Token Authentication (e.g., Docker Gateway)
+
+```json
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "bearer",
+    "token": "juam4ckacyaedsxge6yt6pz1b0uq77a560x0t9f15bopsb3x7d"
+  }
+}
+```
+
+CLI equivalent:
+```bash
+mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
+  --auth-type bearer --auth-token "juam4ckacyaedsxge6yt6pz1b0uq77a560x0t9f15bopsb3x7d"
+```
+
+### HTTP Basic Authentication
+
+```json
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "basic",
+    "username": "admin",
+    "password": "secret"
+  }
+}
+```
+
+CLI equivalent:
+```bash
+mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
+  --auth-type basic --auth-user admin --auth-pass secret
+```
+
+### Client Certificate Authentication (mTLS)
+
+```json
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "certificate": {
+    "cert": "/path/to/client-cert.pem",
+    "key": "/path/to/client-key.pem",
+    "ca": "/path/to/ca-cert.pem",
+    "passphrase": "optional-key-passphrase",
+    "rejectUnauthorized": true
+  }
+}
+```
+
+CLI equivalent:
+```bash
+mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
+  --cert /path/to/client-cert.pem --key /path/to/client-key.pem \
+  --ca /path/to/ca-cert.pem --cert-passphrase "optional-key-passphrase"
+```
+
+### Custom Headers
+
+```json
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "headers": {
+    "X-API-Key": "your-api-key-here",
+    "X-Custom-Header": "custom-value"
+  }
+}
+```
+
+CLI equivalent:
+```bash
+mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
+  --header "X-API-Key: your-api-key-here" --header "X-Custom-Header: custom-value"
+```
+
+### Bearer Auth + Proxy (Burp Suite)
+
+```json
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "bearer",
+    "token": "juam4ckacyaedsxge6yt6pz1b0uq77a560x0t9f15bopsb3x7d"
+  },
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "protocol": "http",
+    "auth": {
+      "username": "proxyuser",
+      "password": "proxypass"
+    }
+  }
+}
+```
 
 ### Testing a Local MCP Server with Burp Suite
 

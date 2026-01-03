@@ -1,0 +1,8 @@
+{
+  "type": "wss",
+  "url": "wss://api.example.com/mcp",
+  "auth": {
+    "type": "bearer",
+    "token": "juam4ckacyaedsxge6yt6pz1b0uq77a560x0t9f15bopsb3x7d"
+  }
+}

@@ -1,6 +1,8 @@
 import blessed from 'blessed';
 import { MCPClient } from '../mcp-client';
-import { MCPTool, MCPResource, MCPPrompt } from '../types';
+import { MCPTool, MCPResource, MCPPrompt, TransportConfig } from '../types';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class TUI {
   private screen: blessed.Widgets.Screen;
@@ -14,6 +16,7 @@ export class TUI {
 
   private currentView: 'tools' | 'resources' | 'prompts' | 'traffic' = 'tools';
   private client?: MCPClient;
+  private currentConfig?: TransportConfig;
   private trafficLines: string[] = [];
   private trafficPairs: Array<{request: any, response: any | null, timestamp: Date}> = [];
   private activePanel: 'sidebar' | 'main' | 'traffic' = 'sidebar';
@@ -267,6 +270,11 @@ export class TUI {
       this.screen.render();
     });
 
+    // F6 - Show saved connections
+    this.screen.key(['f6'], () => {
+      this.showSavedConnections();
+    });
+
     // Handle selection in main panel
     this.layout.main.key(['enter'], async () => {
       await this.handleMainSelection();
@@ -283,16 +291,25 @@ export class TUI {
     });
   }
 
-  setClient(client: MCPClient) {
+  setClient(client: MCPClient, config?: TransportConfig) {
     this.client = client;
+    if (config) {
+      this.currentConfig = config;
+    }
 
     // Set up event handlers
     client.on('connected', (result) => {
       const serverName = result.serverInfo?.name || 'Unknown';
       const serverVersion = result.serverInfo?.version || '?';
+      
+      // Save connection config on successful connection
+      if (this.currentConfig) {
+        this.saveConnectionConfig(this.currentConfig, serverName);
+      }
+      
       this.layout.status.setContent(
         `{green-fg}Connected{/green-fg} to ${this.escapeBlessedTags(serverName)} v${serverVersion} | ` +
-        `{cyan-fg}F1{/cyan-fg}=Nav {cyan-fg}F2{/cyan-fg}=Content {cyan-fg}F3{/cyan-fg}=Traffic {cyan-fg}F4{/cyan-fg}=Close {cyan-fg}F5{/cyan-fg}=Refresh {cyan-fg}F10{/cyan-fg}=Quit | ` +
+        `{cyan-fg}F1{/cyan-fg}=Nav {cyan-fg}F2{/cyan-fg}=Content {cyan-fg}F3{/cyan-fg}=Traffic {cyan-fg}F4{/cyan-fg}=Close {cyan-fg}F5{/cyan-fg}=Refresh {cyan-fg}F6{/cyan-fg}=Connections {cyan-fg}F10{/cyan-fg}=Quit | ` +
         `{bold}{cyan-fg}IntegSec{/cyan-fg}{/bold} {gray-fg}({green-fg}integsec.com{/green-fg}) - Need pentesting? Contact us!{/gray-fg}`
       );
       this.updateCurrentView();
@@ -981,5 +998,184 @@ export class TUI {
 
     msg.focus();
     this.screen.render();
+  }
+
+  private saveConnectionConfig(config: TransportConfig, serverName: string): void {
+    try {
+      const cwd = process.cwd();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const sanitizedServerName = serverName.replace(/[^a-zA-Z0-9-_]/g, '_').toLowerCase();
+      const filename = `${sanitizedServerName}-${timestamp}.mcp-connection.json`;
+      const filepath = path.join(cwd, filename);
+
+      const configToSave = {
+        ...config,
+        _saved: {
+          timestamp: new Date().toISOString(),
+          serverName: serverName,
+        }
+      };
+
+      fs.writeFileSync(filepath, JSON.stringify(configToSave, null, 2), 'utf-8');
+      this.addTrafficLine(`{green-fg}Connection saved:{/green-fg} ${filename}`);
+      this.screen.render();
+    } catch (error) {
+      this.addTrafficLine(`{red-fg}Failed to save connection:{/red-fg} ${error instanceof Error ? error.message : String(error)}`);
+      this.screen.render();
+    }
+  }
+
+  private getSavedConnections(): Array<{ filepath: string; config: TransportConfig; serverName: string; timestamp: string }> {
+    const connections: Array<{ filepath: string; config: TransportConfig; serverName: string; timestamp: string }> = [];
+    
+    try {
+      const cwd = process.cwd();
+      const files = fs.readdirSync(cwd);
+      
+      for (const file of files) {
+        if (file.endsWith('.mcp-connection.json')) {
+          try {
+            const filepath = path.join(cwd, file);
+            const content = fs.readFileSync(filepath, 'utf-8');
+            const config = JSON.parse(content) as TransportConfig & { _saved?: { timestamp: string; serverName: string } };
+            
+            const serverName = config._saved?.serverName || this.getConnectionDisplayName(config);
+            const timestamp = config._saved?.timestamp || new Date(fs.statSync(filepath).mtime).toISOString();
+            
+            // Remove _saved metadata for the actual config
+            const { _saved, ...cleanConfig } = config;
+            
+            connections.push({
+              filepath,
+              config: cleanConfig,
+              serverName,
+              timestamp,
+            });
+          } catch (error) {
+            // Skip invalid files
+            continue;
+          }
+        }
+      }
+      
+      // Sort by timestamp, most recent first
+      connections.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    } catch (error) {
+      // If directory read fails, return empty array
+    }
+    
+    return connections;
+  }
+
+  private getConnectionDisplayName(config: TransportConfig): string {
+    if (config.type === 'stdio' && config.command) {
+      return `${config.command} ${(config.args || []).slice(0, 2).join(' ')}`;
+    } else if (config.url) {
+      try {
+        const url = new URL(config.url);
+        return `${config.type}://${url.hostname}${url.port ? ':' + url.port : ''}`;
+      } catch {
+        return config.url;
+      }
+    }
+    return `${config.type} connection`;
+  }
+
+  private showSavedConnections(): void {
+    const connections = this.getSavedConnections();
+    
+    if (connections.length === 0) {
+      this.showMessage(
+        'No Saved Connections',
+        '{yellow-fg}No saved connections found in current directory.{/yellow-fg}\n\n' +
+        'Connections are automatically saved when you successfully connect to a server.\n' +
+        'Saved files use the extension: {cyan-fg}.mcp-connection.json{/cyan-fg}',
+        'yellow'
+      );
+      return;
+    }
+
+    const items = connections.map((conn, index) => {
+      const date = new Date(conn.timestamp);
+      const dateStr = date.toLocaleString();
+      return `${index + 1}. ${conn.serverName} (${dateStr})`;
+    });
+
+    const list = blessed.list({
+      parent: this.screen,
+      top: 'center',
+      left: 'center',
+      width: '80%',
+      height: Math.min(connections.length + 4, 20),
+      border: {
+        type: 'line',
+      },
+      style: {
+        border: {
+          fg: 'cyan',
+        },
+        selected: {
+          bg: 'blue',
+        },
+      },
+      keys: true,
+      vi: true,
+      items: items,
+      label: ' Saved Connections (F4 to close, Enter to switch) ',
+    });
+
+    list.on('select', async (item, index) => {
+      const selectedConnection = connections[index];
+      list.destroy();
+      this.screen.render();
+      
+      await this.switchConnection(selectedConnection.config, selectedConnection.filepath);
+    });
+
+    list.key(['escape', 'f4'], () => {
+      list.destroy();
+      this.screen.render();
+    });
+
+    list.focus();
+    this.screen.render();
+  }
+
+  private async switchConnection(config: TransportConfig, filepath: string): Promise<void> {
+    try {
+      // Show loading message
+      this.layout.status.setContent('{yellow-fg}Switching connection...{/yellow-fg}');
+      this.screen.render();
+
+      // Disconnect current client if exists
+      if (this.client) {
+        try {
+          await this.client.disconnect();
+        } catch {
+          // Ignore disconnect errors
+        }
+      }
+
+      // Create new client with the saved config
+      const newClient = new MCPClient(config);
+      this.setClient(newClient, config);
+
+      // Clear current state
+      this.trafficLines = [];
+      this.trafficPairs = [];
+      this.layout.traffic.setContent('');
+      this.layout.main.setItems([]);
+      this.currentView = 'tools';
+
+      // Connect
+      await newClient.connect();
+      
+      this.addTrafficLine(`{green-fg}Switched to connection:{/green-fg} ${path.basename(filepath)}`);
+      this.screen.render();
+    } catch (error) {
+      this.layout.status.setContent(`{red-fg}Failed to switch connection:{/red-fg} ${error instanceof Error ? error.message : String(error)}`);
+      this.addTrafficLine(`{red-fg}Connection switch failed:{/red-fg} ${error instanceof Error ? error.message : String(error)}`);
+      this.screen.render();
+    }
   }
 }

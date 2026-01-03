@@ -1,11 +1,48 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
+*.tgz
+*.tar.gz
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# Editor files
 *.swp
 *.swo
 *~
-.DS_Store
-coverage/
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test files (may contain real credentials)
+test-config.json
+*.test-config.json
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Connection files (may contain real credentials)
+*.mcp-connection.json

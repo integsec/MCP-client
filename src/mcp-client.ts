@@ -46,7 +46,13 @@ export class MCPClient extends EventEmitter {
         if (!this.config.url) {
           throw new Error('URL required for HTTP transport');
         }
-        this.transport = new HttpTransport(this.config.url, this.config.proxy);
+        this.transport = new HttpTransport(
+          this.config.url,
+          this.config.proxy,
+          this.config.auth,
+          this.config.certificate,
+          this.config.headers
+        );
         break;
 
       case 'ws':
@@ -54,7 +60,13 @@ export class MCPClient extends EventEmitter {
         if (!this.config.url) {
           throw new Error('URL required for WebSocket transport');
         }
-        this.transport = new WebSocketTransport(this.config.url, this.config.proxy);
+        this.transport = new WebSocketTransport(
+          this.config.url,
+          this.config.proxy,
+          this.config.auth,
+          this.config.certificate,
+          this.config.headers
+        );
         break;
 
       default:

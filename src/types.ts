@@ -81,6 +81,24 @@ export interface MCPInitializeResult {
 // Transport types
 export type TransportType = 'stdio' | 'http' | 'https' | 'ws' | 'wss';
 
+export type AuthType = 'bearer' | 'basic' | 'custom';
+
+export interface AuthConfig {
+  type: AuthType;
+  token?: string;
+  username?: string;
+  password?: string;
+  headers?: Record<string, string>;
+}
+
+export interface CertificateConfig {
+  cert?: string;
+  key?: string;
+  ca?: string;
+  passphrase?: string;
+  rejectUnauthorized?: boolean;
+}
+
 export interface TransportConfig {
   type: TransportType;
   url?: string;
@@ -88,6 +106,9 @@ export interface TransportConfig {
   args?: string[];
   env?: Record<string, string>;
   proxy?: ProxyConfig;
+  auth?: AuthConfig;
+  certificate?: CertificateConfig;
+  headers?: Record<string, string>;
 }
 
 export interface ProxyConfig {

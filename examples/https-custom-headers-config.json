@@ -1,0 +1,12 @@
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "headers": {
+    "X-API-Key": "your-api-key-here",
+    "X-Custom-Header": "custom-value"
+  },
+  "auth": {
+    "type": "bearer",
+    "token": "your-bearer-token"
+  }
+}

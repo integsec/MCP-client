@@ -7,12 +7,17 @@ import { TransportConfig } from './types';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Read version from package.json
+const packageJsonPath = path.join(__dirname, '../package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+const version = packageJson.version || '1.0.0';
+
 const program = new Command();
 
 program
   .name('mcp-pentester-cli')
   .description('Interactive console tool for pentesting MCP servers via JSON-RPC 2.0')
-  .version('1.0.0');
+  .version(version);
 
 program
   .command('connect')
@@ -26,6 +31,16 @@ program
   .option('--proxy-protocol <protocol>', 'Proxy protocol: http, https, socks, socks5')
   .option('--proxy-user <username>', 'Proxy username')
   .option('--proxy-pass <password>', 'Proxy password')
+  .option('--auth-type <type>', 'Authentication type: bearer, basic, custom')
+  .option('--auth-token <token>', 'Bearer token for authentication')
+  .option('--auth-user <username>', 'Username for basic authentication')
+  .option('--auth-pass <password>', 'Password for basic authentication')
+  .option('--header <header...>', 'Custom headers (format: "Key: Value")')
+  .option('--cert <path>', 'Path to client certificate file')
+  .option('--key <path>', 'Path to client certificate key file')
+  .option('--ca <path>', 'Path to CA certificate file')
+  .option('--cert-passphrase <passphrase>', 'Passphrase for encrypted certificate key')
+  .option('--insecure', 'Disable TLS certificate verification (dangerous)')
   .option('-f, --config <file>', 'Load configuration from JSON file')
   .action(async (options) => {
     let config: TransportConfig;
@@ -69,6 +84,42 @@ program
           };
         }
       }
+
+      // Authentication configuration
+      if (options.authType) {
+        config.auth = {
+          type: options.authType,
+        };
+
+        if (options.authType === 'bearer' && options.authToken) {
+          config.auth.token = options.authToken;
+        } else if (options.authType === 'basic' && options.authUser && options.authPass) {
+          config.auth.username = options.authUser;
+          config.auth.password = options.authPass;
+        }
+      }
+
+      // Custom headers
+      if (options.header) {
+        config.headers = {};
+        for (const header of options.header) {
+          const [key, ...valueParts] = header.split(':');
+          const value = valueParts.join(':').trim();
+          if (key && value) {
+            config.headers[key.trim()] = value;
+          }
+        }
+      }
+
+      // Certificate configuration
+      if (options.cert || options.key || options.ca || options.certPassphrase || options.insecure !== undefined) {
+        config.certificate = {};
+        if (options.cert) config.certificate.cert = options.cert;
+        if (options.key) config.certificate.key = options.key;
+        if (options.ca) config.certificate.ca = options.ca;
+        if (options.certPassphrase) config.certificate.passphrase = options.certPassphrase;
+        if (options.insecure !== undefined) config.certificate.rejectUnauthorized = !options.insecure;
+      }
     }
 
     // Validate config
@@ -88,7 +139,7 @@ program
 
     // Create and connect client
     const client = new MCPClient(config);
-    tui.setClient(client);
+    tui.setClient(client, config);
 
     try {
       // Add a timeout to prevent hanging forever

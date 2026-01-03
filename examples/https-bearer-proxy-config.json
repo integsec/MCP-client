@@ -1,0 +1,17 @@
+{
+  "type": "https",
+  "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "bearer",
+    "token": "juam4ckacyaedsxge6yt6pz1b0uq77a560x0t9f15bopsb3x7d"
+  },
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "protocol": "http",
+    "auth": {
+      "username": "proxyuser",
+      "password": "proxypass"
+    }
+  }
+}

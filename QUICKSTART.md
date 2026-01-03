@@ -84,6 +84,7 @@ Once connected, you'll see an interactive interface:
 ### Keyboard Controls
 
 **Function Keys (IntegSec Standard):**
+
 - **F1**: Focus navigation sidebar
 - **F2**: Focus main content panel
 - **F3**: Focus traffic log panel
@@ -92,6 +93,7 @@ Once connected, you'll see an interactive interface:
 - **F10**: Quit application
 
 **Navigation:**
+
 - **↑/↓**: Navigate through lists
 - **Enter**: Execute selected item
   - In Tools: Execute the tool (will prompt for parameters)
@@ -100,6 +102,7 @@ Once connected, you'll see an interactive interface:
   - In Traffic: View detailed request/response pair side-by-side
 
 **Traffic Log Features:**
+
 - **Most recent at top** - Latest traffic appears first
 - **Detailed info** - Shows timestamps, tool names, parameters, URIs, errors
 - **Request/Response pairing** - Press Enter to see full paired messages

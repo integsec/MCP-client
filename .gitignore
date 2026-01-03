@@ -45,4 +45,4 @@ coverage/
 .cache/
 
 # Connection files (may contain real credentials)
-*.mcp-connection.json
+*.mcpconn

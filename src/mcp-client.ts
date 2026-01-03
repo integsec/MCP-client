@@ -3,6 +3,7 @@ import { Transport } from './transport/base';
 import { StdioTransport } from './transport/stdio';
 import { HttpTransport } from './transport/http';
 import { WebSocketTransport } from './transport/websocket';
+import { SSETransport } from './transport/sse';
 import {
   TransportConfig,
   MCPInitializeResult,
@@ -61,6 +62,19 @@ export class MCPClient extends EventEmitter {
           throw new Error('URL required for WebSocket transport');
         }
         this.transport = new WebSocketTransport(
+          this.config.url,
+          this.config.proxy,
+          this.config.auth,
+          this.config.certificate,
+          this.config.headers
+        );
+        break;
+
+      case 'sse':
+        if (!this.config.url) {
+          throw new Error('URL required for SSE transport');
+        }
+        this.transport = new SSETransport(
           this.config.url,
           this.config.proxy,
           this.config.auth,
@@ -137,9 +151,18 @@ export class MCPClient extends EventEmitter {
   }
 
   async listTools(): Promise<MCPTool[]> {
-    const result = await this.transport!.request('tools/list');
-    this.state.tools = result.tools || [];
-    return this.state.tools;
+    try {
+      const result = await this.transport!.request('tools/list');
+      this.state.tools = result.tools || [];
+      return this.state.tools;
+    } catch (error: any) {
+      // If method not supported, return empty array silently
+      if (error?.message?.includes('not a function') || error?.message?.includes('not found') || error?.code === -32601) {
+        this.state.tools = [];
+        return [];
+      }
+      throw error;
+    }
   }
 
   async callTool(name: string, args: any = {}): Promise<any> {
@@ -150,9 +173,18 @@ export class MCPClient extends EventEmitter {
   }
 
   async listResources(): Promise<MCPResource[]> {
-    const result = await this.transport!.request('resources/list');
-    this.state.resources = result.resources || [];
-    return this.state.resources;
+    try {
+      const result = await this.transport!.request('resources/list');
+      this.state.resources = result.resources || [];
+      return this.state.resources;
+    } catch (error: any) {
+      // If method not supported, return empty array silently
+      if (error?.message?.includes('not a function') || error?.message?.includes('not found') || error?.code === -32601) {
+        this.state.resources = [];
+        return [];
+      }
+      throw error;
+    }
   }
 
   async readResource(uri: string): Promise<any> {
@@ -160,9 +192,18 @@ export class MCPClient extends EventEmitter {
   }
 
   async listPrompts(): Promise<MCPPrompt[]> {
-    const result = await this.transport!.request('prompts/list');
-    this.state.prompts = result.prompts || [];
-    return this.state.prompts;
+    try {
+      const result = await this.transport!.request('prompts/list');
+      this.state.prompts = result.prompts || [];
+      return this.state.prompts;
+    } catch (error: any) {
+      // If method not supported, return empty array silently
+      if (error?.message?.includes('not a function') || error?.message?.includes('not found') || error?.code === -32601) {
+        this.state.prompts = [];
+        return [];
+      }
+      throw error;
+    }
   }
 
   async getPrompt(name: string, args: any = {}): Promise<any> {
@@ -174,11 +215,14 @@ export class MCPClient extends EventEmitter {
 
   async refreshAll(): Promise<void> {
     try {
-      await Promise.all([
+      // Always try to fetch all lists - servers should return errors if not supported
+      const promises: Promise<any>[] = [
         this.listTools().catch(() => []),
         this.listResources().catch(() => []),
         this.listPrompts().catch(() => []),
-      ]);
+      ];
+
+      await Promise.all(promises);
     } catch (error) {
       // Ignore errors during refresh
     }

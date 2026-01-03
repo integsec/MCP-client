@@ -22,7 +22,7 @@ program
 program
   .command('connect')
   .description('Connect to an MCP server')
-  .option('-t, --transport <type>', 'Transport type: stdio, http, https, ws, wss', 'stdio')
+  .option('-t, --transport <type>', 'Transport type: stdio, http, https, ws, wss, sse', 'stdio')
   .option('-u, --url <url>', 'URL for HTTP/WebSocket transports')
   .option('-c, --command <command>', 'Command for stdio transport')
   .option('-a, --args <args...>', 'Arguments for stdio command')
@@ -50,7 +50,11 @@ program
       try {
         const configPath = path.resolve(options.config);
         const configData = fs.readFileSync(configPath, 'utf-8');
-        config = JSON.parse(configData);
+        const parsedConfig = JSON.parse(configData);
+        
+        // Remove _saved metadata if present (from previously saved connection files)
+        const { _saved, ...cleanConfig } = parsedConfig;
+        config = cleanConfig;
       } catch (error) {
         console.error(`Failed to load config file: ${error}`);
         process.exit(1);
@@ -66,8 +70,15 @@ program
       }
 
       if (options.command) {
-        config.command = options.command;
-        config.args = options.args || [];
+        // If no explicit args provided and command contains spaces, parse it
+        if (!options.args || options.args.length === 0) {
+          const parts = options.command.match(/(?:[^\s"]+|"[^"]*")+/g) || [options.command];
+          config.command = parts[0].replace(/"/g, '');
+          config.args = parts.slice(1).map((arg: string) => arg.replace(/"/g, ''));
+        } else {
+          config.command = options.command;
+          config.args = options.args;
+        }
       }
 
       if (options.proxyHost && options.proxyPort) {
@@ -129,7 +140,7 @@ program
     }
 
     if ((config.type === 'http' || config.type === 'https' ||
-         config.type === 'ws' || config.type === 'wss') && !config.url) {
+         config.type === 'ws' || config.type === 'wss' || config.type === 'sse') && !config.url) {
       console.error(`Error: --url is required for ${config.type} transport`);
       process.exit(1);
     }

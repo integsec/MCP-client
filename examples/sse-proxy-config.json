@@ -1,0 +1,17 @@
+{
+  "type": "sse",
+  "url": "https://api.example.com/mcp",
+  "auth": {
+    "type": "bearer",
+    "token": "your-bearer-token-here"
+  },
+  "proxy": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "protocol": "http",
+    "auth": {
+      "username": "proxyuser",
+      "password": "proxypass"
+    }
+  }
+}

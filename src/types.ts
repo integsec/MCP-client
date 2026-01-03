@@ -79,7 +79,7 @@ export interface MCPInitializeResult {
 }
 
 // Transport types
-export type TransportType = 'stdio' | 'http' | 'https' | 'ws' | 'wss';
+export type TransportType = 'stdio' | 'http' | 'https' | 'ws' | 'wss' | 'sse';
 
 export type AuthType = 'bearer' | 'basic' | 'custom';
 

@@ -292,6 +292,11 @@ export class TUI {
   }
 
   setClient(client: MCPClient, config?: TransportConfig) {
+    // Remove all listeners from old client if it exists
+    if (this.client) {
+      this.client.removeAllListeners();
+    }
+    
     this.client = client;
     if (config) {
       this.currentConfig = config;
@@ -364,6 +369,25 @@ export class TUI {
         let responseLine = '';
         if ('error' in data && data.error) {
           const errorMsg = this.escapeBlessedTags(String(data.error.message || 'Unknown error'));
+          
+          // Suppress "method not found" errors for list methods (expected when server doesn't support them)
+          if (responseId !== null && this.pendingRequests.has(responseId)) {
+            const requestData = this.pendingRequests.get(responseId)!.data;
+            if (requestData && 'method' in requestData) {
+              const method = (requestData as any).method;
+              const isListMethod = ['tools/list', 'resources/list', 'prompts/list'].includes(method);
+              const isMethodNotFoundError = errorMsg.includes('not a function') || 
+                                            errorMsg.includes('not found') || 
+                                            (data.error as any)?.code === -32601;
+              
+              if (isListMethod && isMethodNotFoundError) {
+                // Don't log expected "method not supported" errors for list methods
+                this.pendingRequests.delete(responseId);
+                return; // Skip logging this error
+              }
+            }
+          }
+          
           responseLine = `{cyan-fg}[${timestamp}]{/cyan-fg} {red-fg}<<<{/red-fg} ERROR: ${errorMsg}`;
         } else {
           const resultPreview = ('result' in data && data.result)
@@ -437,8 +461,14 @@ export class TUI {
 
   private updateCurrentView() {
     if (!this.client) return;
-
+    
+    // Check if client is connected before trying to get state
     const state = this.client.getState();
+    if (!state.connected) {
+      // Client not connected yet, show loading message
+      this.layout.main.setItems(['{yellow-fg}Connecting... Please wait.{/yellow-fg}']);
+      return;
+    }
 
     switch (this.currentView) {
       case 'tools':
@@ -637,6 +667,9 @@ export class TUI {
 
   async prompt(label: string): Promise<string> {
     return new Promise((resolve) => {
+      // Remember which panel was active before prompting
+      const previousPanel = this.activePanel;
+
       this.layout.input.setLabel(` ${label} `);
       this.layout.input.show();
       this.layout.input.focus();
@@ -644,7 +677,20 @@ export class TUI {
       this.layout.input.on('submit', (value) => {
         this.layout.input.hide();
         this.layout.input.clearValue();
-        this.layout.sidebar.focus();
+
+        // Restore focus to the previously active panel
+        switch (previousPanel) {
+          case 'sidebar':
+            this.layout.sidebar.focus();
+            break;
+          case 'main':
+            this.layout.main.focus();
+            break;
+          case 'traffic':
+            this.layout.traffic.focus();
+            break;
+        }
+
         this.screen.render();
         resolve(value || '');
       });
@@ -652,7 +698,20 @@ export class TUI {
       this.layout.input.on('cancel', () => {
         this.layout.input.hide();
         this.layout.input.clearValue();
-        this.layout.sidebar.focus();
+
+        // Restore focus to the previously active panel
+        switch (previousPanel) {
+          case 'sidebar':
+            this.layout.sidebar.focus();
+            break;
+          case 'main':
+            this.layout.main.focus();
+            break;
+          case 'traffic':
+            this.layout.traffic.focus();
+            break;
+        }
+
         this.screen.render();
         resolve('');
       });
@@ -1061,18 +1120,65 @@ export class TUI {
       filename = filename.substring(0, 100);
     }
     
-    return `${filename}.mcp-connection.json`;
+    return `${filename}.mcpconn`;
   }
 
   private configsAreEqual(config1: TransportConfig, config2: TransportConfig): boolean {
-    // Deep comparison of configs (excluding _saved metadata)
+    // Deep comparison of configs (excluding _saved metadata and undefined values)
     const normalize = (config: TransportConfig): string => {
-      const normalized = { ...config };
-      // Sort arrays for comparison
-      if (normalized.args) {
-        normalized.args = [...normalized.args].sort();
+      const normalized: any = {};
+      
+      // Copy only defined properties
+      if (config.type !== undefined) normalized.type = config.type;
+      if (config.url !== undefined) normalized.url = config.url;
+      if (config.command !== undefined) normalized.command = config.command;
+      if (config.args !== undefined) {
+        // Sort arrays for comparison
+        normalized.args = Array.isArray(config.args) ? [...config.args].sort() : config.args;
       }
-      return JSON.stringify(normalized, Object.keys(normalized).sort());
+      if (config.env !== undefined) {
+        // Sort env object keys for comparison
+        const envKeys = Object.keys(config.env).sort();
+        normalized.env = {};
+        for (const key of envKeys) {
+          normalized.env[key] = config.env![key];
+        }
+      }
+      if (config.proxy !== undefined) {
+        normalized.proxy = { ...config.proxy };
+        if (config.proxy.auth !== undefined) {
+          normalized.proxy.auth = { ...config.proxy.auth };
+        }
+      }
+      if (config.auth !== undefined) {
+        normalized.auth = { ...config.auth };
+        if (config.auth.headers !== undefined) {
+          const headerKeys = Object.keys(config.auth.headers).sort();
+          normalized.auth.headers = {};
+          for (const key of headerKeys) {
+            normalized.auth.headers[key] = config.auth.headers![key];
+          }
+        }
+      }
+      if (config.certificate !== undefined) {
+        normalized.certificate = { ...config.certificate };
+      }
+      if (config.headers !== undefined) {
+        const headerKeys = Object.keys(config.headers).sort();
+        normalized.headers = {};
+        for (const key of headerKeys) {
+          normalized.headers[key] = config.headers[key];
+        }
+      }
+      
+      // Sort top-level keys for consistent comparison
+      const sortedKeys = Object.keys(normalized).sort();
+      const sorted: any = {};
+      for (const key of sortedKeys) {
+        sorted[key] = normalized[key];
+      }
+      
+      return JSON.stringify(sorted);
     };
     
     return normalize(config1) === normalize(config2);
@@ -1084,15 +1190,15 @@ export class TUI {
       const files = fs.readdirSync(cwd);
       
       for (const file of files) {
-        if (file.endsWith('.mcp-connection.json')) {
+        if (file.endsWith('.mcpconn')) {
           try {
             const filepath = path.join(cwd, file);
             const content = fs.readFileSync(filepath, 'utf-8');
             const savedConfig = JSON.parse(content) as TransportConfig & { _saved?: any };
-            
+
             // Remove _saved metadata for comparison
             const { _saved, ...cleanConfig } = savedConfig;
-            
+
             if (this.configsAreEqual(config, cleanConfig)) {
               return filepath;
             }
@@ -1138,8 +1244,8 @@ export class TUI {
       let finalFilepath = filepath;
       if (fs.existsSync(filepath)) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const baseName = filename.replace('.mcp-connection.json', '');
-        finalFilepath = path.join(cwd, `${baseName}-${timestamp}.mcp-connection.json`);
+        const baseName = filename.replace('.mcpconn', '');
+        finalFilepath = path.join(cwd, `${baseName}-${timestamp}.mcpconn`);
       }
 
       const configToSave = {
@@ -1167,18 +1273,18 @@ export class TUI {
       const files = fs.readdirSync(cwd);
       
       for (const file of files) {
-        if (file.endsWith('.mcp-connection.json')) {
+        if (file.endsWith('.mcpconn')) {
           try {
             const filepath = path.join(cwd, file);
             const content = fs.readFileSync(filepath, 'utf-8');
             const config = JSON.parse(content) as TransportConfig & { _saved?: { timestamp: string; serverName: string } };
-            
+
             const serverName = config._saved?.serverName || this.getConnectionDisplayName(config);
             const timestamp = config._saved?.timestamp || new Date(fs.statSync(filepath).mtime).toISOString();
-            
+
             // Remove _saved metadata for the actual config
             const { _saved, ...cleanConfig } = config;
-            
+
             connections.push({
               filepath,
               config: cleanConfig,
@@ -1223,7 +1329,7 @@ export class TUI {
         'No Saved Connections',
         '{yellow-fg}No saved connections found in current directory.{/yellow-fg}\n\n' +
         'Connections are automatically saved when you successfully connect to a server.\n' +
-        'Saved files use the extension: {cyan-fg}.mcp-connection.json{/cyan-fg}',
+        'Saved files use the extension: {cyan-fg}.mcpconn{/cyan-fg}',
         'yellow'
       );
       return;
@@ -1232,7 +1338,7 @@ export class TUI {
     const items = connections.map((conn, index) => {
       const date = new Date(conn.timestamp);
       const dateStr = date.toLocaleString();
-      const filename = path.basename(conn.filepath, '.mcp-connection.json');
+      const filename = path.basename(conn.filepath, '.mcpconn');
       
       // Show filename details if it contains useful info
       let displayName = conn.serverName;
@@ -1290,18 +1396,17 @@ export class TUI {
       this.layout.status.setContent('{yellow-fg}Switching connection...{/yellow-fg}');
       this.screen.render();
 
-      // Disconnect current client if exists
+      // Disconnect and remove old client if exists
       if (this.client) {
         try {
+          // Remove all event listeners first
+          this.client.removeAllListeners();
           await this.client.disconnect();
         } catch {
           // Ignore disconnect errors
         }
+        this.client = undefined;
       }
-
-      // Create new client with the saved config
-      const newClient = new MCPClient(config);
-      this.setClient(newClient, config);
 
       // Clear current state
       this.trafficLines = [];
@@ -1310,8 +1415,17 @@ export class TUI {
       this.layout.main.setItems([]);
       this.currentView = 'tools';
 
-      // Connect
+      // Create new client with the saved config
+      const newClient = new MCPClient(config);
+      
+      // Set up client and event handlers BEFORE connecting
+      this.setClient(newClient, config);
+
+      // Connect and wait for it to complete
       await newClient.connect();
+      
+      // Wait a moment for the UI to update from the 'connected' event
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       this.addTrafficLine(`{green-fg}Switched to connection:{/green-fg} ${path.basename(filepath)}`);
       this.screen.render();

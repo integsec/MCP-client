@@ -1,0 +1,8 @@
+{
+  "type": "sse",
+  "url": "http://127.0.0.1:8811/sse?sessionid=YOUR_SESSION_ID",
+  "auth": {
+    "type": "bearer",
+    "token": "YOUR_BEARER_TOKEN"
+  }
+}

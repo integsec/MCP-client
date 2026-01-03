@@ -12,6 +12,7 @@ A free, open-source interactive console tool for penetration testers to interact
   - stdio (process communication)
   - HTTP/HTTPS
   - WebSocket (ws/wss)
+  - SSE (Server-Sent Events) - for Docker MCP Gateway and streaming servers
 
 - **Authentication Support**
   - Bearer token authentication
@@ -124,6 +125,14 @@ mcp-pentester-cli connect --transport http --url "http://localhost:3000/mcp" --p
 mcp-pentester-cli connect --transport wss --url "wss://api.example.com/mcp" --proxy-host 127.0.0.1 --proxy-port 9050 --proxy-protocol socks5
 ```
 
+### Connect to Docker MCP Gateway via SSE
+
+```bash
+mcp-pentester-cli connect --transport sse \
+  --url "http://127.0.0.1:8811/sse?sessionid=YOUR_SESSION_ID" \
+  --auth-type bearer --auth-token "YOUR_BEARER_TOKEN"
+```
+
 ### Using Configuration Files
 
 Generate example configs:
@@ -146,7 +155,7 @@ mcp-pentester-cli connect --config examples/http-burp-config.json
 mcp-pentester-cli connect [options]
 
 Options:
-  -t, --transport <type>          Transport type: stdio, http, https, ws, wss (default: "stdio")
+  -t, --transport <type>          Transport type: stdio, http, https, ws, wss, sse (default: "stdio")
   -u, --url <url>                 URL for HTTP/WebSocket transports
   -c, --command <command>         Command for stdio transport
   -a, --args <args...>            Arguments for stdio command
@@ -208,7 +217,7 @@ Options:
 
 **Available configuration options:**
 
-- `type` - Transport type: `stdio`, `http`, `https`, `ws`, `wss`
+- `type` - Transport type: `stdio`, `http`, `https`, `ws`, `wss`, `sse`
 - `url` - Server URL (for HTTP/WebSocket transports)
 - `command` - Command to execute (for stdio transport)
 - `args` - Command arguments array (for stdio transport)
@@ -340,6 +349,28 @@ CLI equivalent:
 mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
   --header "X-API-Key: your-api-key-here" --header "X-Custom-Header: custom-value"
 ```
+
+### SSE Transport (Docker MCP Gateway)
+
+```json
+{
+  "type": "sse",
+  "url": "http://127.0.0.1:8811/sse?sessionid=YOUR_SESSION_ID",
+  "auth": {
+    "type": "bearer",
+    "token": "YOUR_BEARER_TOKEN"
+  }
+}
+```
+
+CLI equivalent:
+```bash
+mcp-pentester-cli connect --transport sse \
+  --url "http://127.0.0.1:8811/sse?sessionid=1hn5f0et4mh9qh35yshkm368eyh0if9hdafttddv2nvaw9cmqh" \
+  --auth-type bearer --auth-token "1hn5f0et4mh9qh35yshkm368eyh0if9hdafttddv2nvaw9cmqh"
+```
+
+**Note:** SSE (Server-Sent Events) transport is ideal for Docker MCP Gateway and other streaming MCP servers. It uses HTTP POST for sending requests and maintains a persistent SSE connection for receiving server responses and notifications.
 
 ### Bearer Auth + Proxy (Burp Suite)
 
@@ -489,7 +520,8 @@ src/
 │   ├── base.ts          # Base transport abstraction
 │   ├── stdio.ts         # stdio transport
 │   ├── http.ts          # HTTP/HTTPS transport
-│   └── websocket.ts     # WebSocket transport
+│   ├── websocket.ts     # WebSocket transport
+│   └── sse.ts           # SSE (Server-Sent Events) transport
 └── ui/
     └── tui.ts           # Terminal UI
 ```

@@ -48,6 +48,7 @@ A free, open-source interactive console tool for penetration testers to interact
 ```bash
 npm install -g @integsec/mcp-pentester-cli
 ```
+
 <｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
 run_terminal_cmd
 
@@ -86,6 +87,7 @@ After global installation, use the `mcp-pentester-cli` command as shown above.
 When you successfully connect to an MCP server, the connection configuration is automatically saved to a `.mcp-connection.json` file in the current directory. This allows you to easily reconnect to the same server later without typing all the connection details again.
 
 **Saved connection files:**
+
 - Format: `{server-name}-{timestamp}.mcp-connection.json`
 - Location: Current working directory
 - Compatible with the `--config` command-line option
@@ -93,11 +95,13 @@ When you successfully connect to an MCP server, the connection configuration is 
 ### Switching Between Saved Connections
 
 Press **F6** in the TUI to view a list of all saved connections in the current directory. You can:
+
 - Navigate the list with ↑/↓
 - Press **Enter** to switch to a selected connection
 - Press **F4** or **ESC** to close the connection list
 
 The connection list shows:
+
 - Server name
 - Connection timestamp
 - Sorted by most recent first
@@ -234,6 +238,7 @@ Options:
 ### TUI Keyboard Shortcuts
 
 **Function Keys:**
+
 - **F1** - Focus navigation sidebar
 - **F2** - Focus main content panel
 - **F3** - Focus traffic log panel
@@ -243,10 +248,12 @@ Options:
 - **F10** - Quit application
 
 **Navigation:**
+
 - **↑/↓** (Up/Down Arrows) - Navigate through lists
 - **Enter** - Execute selected item (call tool, read resource, use prompt, view traffic details)
 
 **Traffic Log:**
+
 - Most recent entries appear at the top
 - Shows detailed information: timestamps, tool names, parameters, URIs
 - Press Enter on any entry to see full request/response pair side-by-side
@@ -274,6 +281,7 @@ Options:
 ```
 
 CLI equivalent:
+
 ```bash
 mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
   --auth-type bearer --auth-token "juam4ckacyaedsxge6yt6pz1b0uq77a560x0t9f15bopsb3x7d"
@@ -294,6 +302,7 @@ mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" 
 ```
 
 CLI equivalent:
+
 ```bash
 mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
   --auth-type basic --auth-user admin --auth-pass secret
@@ -316,6 +325,7 @@ mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" 
 ```
 
 CLI equivalent:
+
 ```bash
 mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
   --cert /path/to/client-cert.pem --key /path/to/client-key.pem \
@@ -336,6 +346,7 @@ mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" 
 ```
 
 CLI equivalent:
+
 ```bash
 mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" \
   --header "X-API-Key: your-api-key-here" --header "X-Custom-Header: custom-value"
@@ -411,6 +422,7 @@ mcp-pentester-cli connect --transport https --url "https://api.example.com/mcp" 
    - Disable SSL validation if testing with self-signed certs
 
 2. **Launch MCP CLI with Proxy**
+
    ```bash
    mcp-pentester-cli connect --transport https --url "https://target.com/mcp" \
      --proxy-host 127.0.0.1 --proxy-port 8080

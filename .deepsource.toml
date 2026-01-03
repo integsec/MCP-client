@@ -1,0 +1,40 @@
+version = 1
+
+[[analyzers]]
+name = "test-coverage"
+
+[[analyzers]]
+name = "shell"
+
+[[analyzers]]
+name = "secrets"
+
+[[analyzers]]
+name = "javascript"
+
+  [analyzers.meta]
+  plugins = [
+    "react",
+    "angular",
+    "vue",
+    "ember",
+    "meteor",
+    "angularjs"
+  ]
+  environment = [
+    "nodejs",
+    "jasmine",
+    "mocha",
+    "vitest",
+    "cypress",
+    "jest",
+    "mongo",
+    "browser",
+    "jquery"
+  ]
+
+[[code_formatters]]
+name = "prettier"
+
+[[code_formatters]]
+name = "standardjs"

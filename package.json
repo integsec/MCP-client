@@ -1,6 +1,6 @@
 {
   "name": "@integsec/mcp-pentester-cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Interactive console tool for pentesting MCP servers via JSON-RPC 2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,13 +42,12 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@integsec/mcp-pentester-cli": "^1.0.3",
+    "@integsec/mcp-pentester-cli": "^1.0.4",
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.11.0",
     "commander": "^11.1.0",
     "http-proxy-agent": "^7.0.0",
     "https-proxy-agent": "^7.0.2",
-    "mcp-pentester-cli": "^1.0.2",
     "socks-proxy-agent": "^8.0.2",
     "ws": "^8.16.0"
   },

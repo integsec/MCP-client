@@ -1000,13 +1000,147 @@ export class TUI {
     this.screen.render();
   }
 
-  private saveConnectionConfig(config: TransportConfig, serverName: string): void {
+  private generateConfigFilename(config: TransportConfig, serverName: string): string {
+    const parts: string[] = [];
+    
+    // Add protocol/transport type
+    parts.push(config.type);
+    
+    // Add connection details based on type
+    if (config.type === 'stdio' && config.command) {
+      // For stdio: protocol-command-arg1-arg2
+      parts.push(config.command.replace(/[^a-zA-Z0-9-_]/g, '_'));
+      if (config.args && config.args.length > 0) {
+        const firstArg = config.args[0].replace(/[^a-zA-Z0-9-_]/g, '_').substring(0, 20);
+        if (firstArg) parts.push(firstArg);
+      }
+    } else if (config.url) {
+      // For HTTP/WebSocket: protocol-hostname-port
+      try {
+        const url = new URL(config.url);
+        parts.push(url.hostname.replace(/[^a-zA-Z0-9-_]/g, '_'));
+        if (url.port) {
+          parts.push(`port${url.port}`);
+        }
+        if (url.pathname && url.pathname !== '/') {
+          const pathPart = url.pathname.replace(/[^a-zA-Z0-9-_]/g, '_').substring(0, 20);
+          if (pathPart) parts.push(pathPart);
+        }
+      } catch {
+        // If URL parsing fails, use sanitized URL
+        const urlPart = config.url.replace(/[^a-zA-Z0-9-_]/g, '_').substring(0, 30);
+        if (urlPart) parts.push(urlPart);
+      }
+    }
+    
+    // Add proxy info if present
+    if (config.proxy) {
+      parts.push('proxy');
+      if (config.proxy.host) {
+        parts.push(config.proxy.host.replace(/[^a-zA-Z0-9-_]/g, '_'));
+      }
+      if (config.proxy.port) {
+        parts.push(`p${config.proxy.port}`);
+      }
+    }
+    
+    // Add auth info if present
+    if (config.auth) {
+      parts.push(config.auth.type || 'auth');
+    }
+    
+    // Add server name (shortened)
+    const sanitizedServerName = serverName.replace(/[^a-zA-Z0-9-_]/g, '_').toLowerCase().substring(0, 20);
+    if (sanitizedServerName) {
+      parts.push(sanitizedServerName);
+    }
+    
+    // Join parts and limit total length
+    let filename = parts.join('-');
+    if (filename.length > 100) {
+      filename = filename.substring(0, 100);
+    }
+    
+    return `${filename}.mcp-connection.json`;
+  }
+
+  private configsAreEqual(config1: TransportConfig, config2: TransportConfig): boolean {
+    // Deep comparison of configs (excluding _saved metadata)
+    const normalize = (config: TransportConfig): string => {
+      const normalized = { ...config };
+      // Sort arrays for comparison
+      if (normalized.args) {
+        normalized.args = [...normalized.args].sort();
+      }
+      return JSON.stringify(normalized, Object.keys(normalized).sort());
+    };
+    
+    return normalize(config1) === normalize(config2);
+  }
+
+  private findExistingConfig(config: TransportConfig): string | null {
     try {
       const cwd = process.cwd();
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      const sanitizedServerName = serverName.replace(/[^a-zA-Z0-9-_]/g, '_').toLowerCase();
-      const filename = `${sanitizedServerName}-${timestamp}.mcp-connection.json`;
+      const files = fs.readdirSync(cwd);
+      
+      for (const file of files) {
+        if (file.endsWith('.mcp-connection.json')) {
+          try {
+            const filepath = path.join(cwd, file);
+            const content = fs.readFileSync(filepath, 'utf-8');
+            const savedConfig = JSON.parse(content) as TransportConfig & { _saved?: any };
+            
+            // Remove _saved metadata for comparison
+            const { _saved, ...cleanConfig } = savedConfig;
+            
+            if (this.configsAreEqual(config, cleanConfig)) {
+              return filepath;
+            }
+          } catch {
+            // Skip invalid files
+            continue;
+          }
+        }
+      }
+    } catch {
+      // If directory read fails, return null
+    }
+    
+    return null;
+  }
+
+  private saveConnectionConfig(config: TransportConfig, serverName: string): void {
+    try {
+      // Check if identical config already exists
+      const existingPath = this.findExistingConfig(config);
+      if (existingPath) {
+        // Update timestamp in existing file
+        const content = fs.readFileSync(existingPath, 'utf-8');
+        const existingConfig = JSON.parse(content) as TransportConfig & { _saved?: { timestamp: string; serverName: string } };
+        
+        existingConfig._saved = {
+          timestamp: new Date().toISOString(),
+          serverName: serverName,
+        };
+        
+        fs.writeFileSync(existingPath, JSON.stringify(existingConfig, null, 2), 'utf-8');
+        this.addTrafficLine(`{yellow-fg}Connection updated:{/yellow-fg} ${path.basename(existingPath)} (no changes detected)`);
+        this.screen.render();
+        return;
+      }
+      
+      // Generate descriptive filename
+      const filename = this.generateConfigFilename(config, serverName);
+      const cwd = process.cwd();
       const filepath = path.join(cwd, filename);
+      
+      // If file already exists with same name, append timestamp
+      let finalFilepath = filepath;
+      if (fs.existsSync(filepath)) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const baseName = filename.replace('.mcp-connection.json', '');
+        finalFilepath = path.join(cwd, `${baseName}-${timestamp}.mcp-connection.json`);
+      }
 
       const configToSave = {
         ...config,
@@ -1016,8 +1150,8 @@ export class TUI {
         }
       };
 
-      fs.writeFileSync(filepath, JSON.stringify(configToSave, null, 2), 'utf-8');
-      this.addTrafficLine(`{green-fg}Connection saved:{/green-fg} ${filename}`);
+      fs.writeFileSync(finalFilepath, JSON.stringify(configToSave, null, 2), 'utf-8');
+      this.addTrafficLine(`{green-fg}Connection saved:{/green-fg} ${path.basename(finalFilepath)}`);
       this.screen.render();
     } catch (error) {
       this.addTrafficLine(`{red-fg}Failed to save connection:{/red-fg} ${error instanceof Error ? error.message : String(error)}`);
@@ -1098,15 +1232,24 @@ export class TUI {
     const items = connections.map((conn, index) => {
       const date = new Date(conn.timestamp);
       const dateStr = date.toLocaleString();
-      return `${index + 1}. ${conn.serverName} (${dateStr})`;
+      const filename = path.basename(conn.filepath, '.mcp-connection.json');
+      
+      // Show filename details if it contains useful info
+      let displayName = conn.serverName;
+      if (filename.length > 0 && filename !== conn.serverName.replace(/[^a-zA-Z0-9-_]/g, '_').toLowerCase()) {
+        // Filename has more details, show both
+        displayName = `${conn.serverName} - ${filename.substring(0, 40)}`;
+      }
+      
+      return `${index + 1}. ${displayName}\n   ${dateStr}`;
     });
 
     const list = blessed.list({
       parent: this.screen,
       top: 'center',
       left: 'center',
-      width: '80%',
-      height: Math.min(connections.length + 4, 20),
+      width: '85%',
+      height: Math.min(connections.length * 2 + 4, 20),
       border: {
         type: 'line',
       },

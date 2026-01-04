@@ -1,6 +1,6 @@
 {
   "name": "@integsec/mcp-pentester-cli",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Interactive console tool for pentesting MCP servers via JSON-RPC 2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -19,7 +19,8 @@ export class StdioTransport extends Transport {
       this.process = spawn(this.command, this.args, {
         env: { ...process.env, ...this.env },
         stdio: ['pipe', 'pipe', 'pipe'],
-        shell: process.platform === 'win32',
+        shell: false,
+        windowsHide: true,
       });
 
       this.process.stdout?.on('data', (data: Buffer) => {

@@ -101,7 +101,7 @@ If upgrading from a previous version:
 3. **Licensing:**
    - Review new LICENSE file
    - Commercial use now requires separate agreement
-   - Contact licensing@integsec.com for commercial licenses
+   - Contact us via our support form (https://integsec.com/support) for commercial licenses
 
 ### Known Issues
 
@@ -120,6 +120,4 @@ Planned for future releases:
 
 **Copyright © 2025 IntegSec. All Rights Reserved.**
 
-For support: support@integsec.com
-For licensing: licensing@integsec.com
-For security issues: security@integsec.com
+For support, licensing, and security issues, please contact us through our support form: https://integsec.com/support

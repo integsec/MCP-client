@@ -165,13 +165,11 @@ This software is free and open source, with all intellectual property rights res
 - Product integration
 - Resale or redistribution
 
-**Contact:** licensing@integsec.com
+**Contact:** [Submit a request via our support form](https://integsec.com/support)
 
 ## Support
 
-- **Technical Support**: support@integsec.com
-- **Security Issues**: security@integsec.com
-- **Sales/Licensing**: licensing@integsec.com
+For technical support, security issues, and sales/licensing inquiries, please [contact us through our support form](https://integsec.com/support).
 
 ## Known Limitations
 

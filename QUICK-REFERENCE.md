@@ -156,9 +156,7 @@ F5 (refreshes current view)
 
 ## Support & Licensing
 
-**Commercial Use:** licensing@integsec.com
-**Technical Support:** support@integsec.com
-**Security Issues:** security@integsec.com
+For commercial use, technical support, and security issues, please [contact us through our support form](https://integsec.com/support).
 
 **This software requires a commercial license for business use.**
 
